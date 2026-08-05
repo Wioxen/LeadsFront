@@ -15,13 +15,22 @@ use App\Auth\Guard;
  */
 final class PermissionsController extends Controller
 {
+    /**
+     * A TELA e do Admin: ela existe para editar o catalogo, e alterar um rotulo muda o que
+     * todos os outros enxergam ao montar perfil.
+     */
     public function index(): never
     {
-        Guard::exigeAdministrador(false);
+        Guard::exigeAdmin(false);
 
         $this->ver('permissoes', ['titulo' => 'Permissoes']);
     }
 
+    /**
+     * A LEITURA continua aberta ao master: e desta listagem que a tela de perfis monta as
+     * caixas, e montar perfil e o trabalho dele. Fechar aqui quebraria o recurso que a
+     * marca existe para permitir.
+     */
     public function listar(): never
     {
         Guard::exigeAdministrador(true);
@@ -38,7 +47,7 @@ final class PermissionsController extends Controller
     /** @param array<string,string> $parametros */
     public function atualizar(array $parametros): never
     {
-        Guard::exigeAdministrador(true);
+        Guard::exigeAdmin(true);
 
         $corpo = $this->corpo();
 

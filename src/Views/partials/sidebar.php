@@ -24,8 +24,16 @@ $itens = [
 $administrativos = [
     ['rota' => '/usuarios',   'pagina' => 'usuarios',   'icone' => 'bi-person-gear',   'rotulo' => 'Usuarios'],
     ['rota' => '/perfis',     'pagina' => 'perfis',     'icone' => 'bi-shield-lock',   'rotulo' => 'Perfis'],
-    ['rota' => '/permissoes', 'pagina' => 'permissoes', 'icone' => 'bi-key',           'rotulo' => 'Permissoes'],
     ['rota' => '/logs',       'pagina' => 'logs',       'icone' => 'bi-journal-text',  'rotulo' => 'Registros de log'],
+];
+
+/*
+ * Permissoes fica FORA da lista acima: a tela edita o catalogo, e isso e do Admin. O
+ * master monta perfil com as permissoes que existem, mas nao muda quais existem nem como
+ * se chamam -- o rotulo que ele escrevesse valeria para todos os outros.
+ */
+$somenteAdmin = [
+    ['rota' => '/permissoes', 'pagina' => 'permissoes', 'icone' => 'bi-key', 'rotulo' => 'Permissoes'],
 ];
 ?>
 <aside class="sidebar">
@@ -51,6 +59,17 @@ $administrativos = [
                     <span class="rotulo"><?= View::e($item['rotulo']) ?></span>
                 </a>
             <?php endforeach; ?>
+
+            <?php if ($papel === 'Admin') : ?>
+                <?php foreach ($somenteAdmin as $item) : ?>
+                    <a class="nav-link <?= $pagina === $item['pagina'] ? 'active' : '' ?>"
+                       href="<?= View::e($item['rota']) ?>"
+                       title="<?= View::e($item['rotulo']) ?>">
+                        <i class="bi <?= View::e($item['icone']) ?>"></i>
+                        <span class="rotulo"><?= View::e($item['rotulo']) ?></span>
+                    </a>
+                <?php endforeach; ?>
+            <?php endif; ?>
         <?php endif; ?>
 
     </nav>

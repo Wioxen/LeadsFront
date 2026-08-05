@@ -59,6 +59,32 @@ final class Guard
         Respond::redirecionar('/?erro=sem-permissao');
     }
 
+    /**
+     * Exige o papel <c>Admin</c>. A marca master NAO basta.
+     *
+     * Espelha a politica AdminOnly da API, que hoje protege a ALTERACAO do catalogo de
+     * permissoes. A leitura continua aberta ao master -- e dela que sai a lista de caixas
+     * da tela de perfis.
+     */
+    public static function exigeAdmin(bool $ehXhr): void
+    {
+        self::exigeLogin($ehXhr);
+
+        if (Session::papel() === 'Admin') {
+            return;
+        }
+
+        if ($ehXhr) {
+            Respond::json([
+                'status' => 403,
+                'title'  => 'Acesso negado',
+                'detail' => 'Apenas o Admin da organizacao pode alterar o catalogo de permissoes.',
+            ], 403);
+        }
+
+        Respond::redirecionar('/?erro=sem-permissao');
+    }
+
     /** Quem ja esta logado nao ve tela de login. */
     public static function exigeAnonimo(): void
     {
