@@ -209,6 +209,11 @@ final class AuthController extends Controller
         $resposta = $this->api->post($endpoint, [
             'token' => $this->campo('token'),
             'senha' => $this->campo('senha'),
+
+            // Campo do contrato: a API exige ConfirmacaoSenha e a compara com Senha. O BFF
+            // repassa em vez de reconstruir a partir de 'senha' -- se as duas divergirem,
+            // quem tem de recusar e a API, e um valor forjado aqui esconderia a divergencia.
+            'confirmacaoSenha' => $this->campo('confirmacaoSenha'),
         ], exigeToken: false);
 
         Session::autenticar($resposta->corpo());

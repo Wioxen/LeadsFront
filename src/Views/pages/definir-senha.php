@@ -39,11 +39,16 @@ use App\View;
             <label class="form-label" for="confirmacao">Repita a senha</label>
             <?php
             /*
-             * A confirmacao e do FRONT: a API nao tem esse campo. Ela existe so para pegar
-             * erro de digitacao antes do envio, e por isso nao viaja no corpo.
+             * A confirmacao VIAJA no corpo: a API tem o campo ConfirmacaoSenha e o valida
+             * como obrigatorio e igual a senha.
+             *
+             * O front tambem compara os dois antes de enviar, mas isso e conforto -- evita
+             * uma ida a rede para dizer o obvio. Quem decide continua sendo o servidor,
+             * como no 401: a checagem local nunca e a autoridade.
              */
             ?>
-            <input type="password" class="form-control" id="confirmacao" required autocomplete="new-password">
+            <input type="password" class="form-control" id="confirmacao" name="confirmacaoSenha"
+                   required autocomplete="new-password">
         </div>
 
         <button type="submit" class="btn btn-primary w-100" id="btn-definir">Definir senha e entrar</button>

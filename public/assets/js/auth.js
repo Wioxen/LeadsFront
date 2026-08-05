@@ -55,8 +55,8 @@
 
       App.limparErros($senha);
 
-      // Conferido aqui porque a API nao tem campo de confirmacao -- mandar as duas para
-      // ela nao acusaria a divergencia, so gravaria a primeira.
+      // Conforto, nao autoridade: evita uma ida a rede para dizer o obvio. A API valida a
+      // confirmacao de novo, e e a resposta dela que vale.
       if (valor !== confirmacao) {
         $('#confirmacao').addClass('is-invalid');
         $('<div class="invalid-feedback">As senhas nao conferem.</div>').insertAfter('#confirmacao');
@@ -68,7 +68,11 @@
 
       App.post($senha.data('acao'), {
         token: $('[name="token"]', $senha).val(),
-        senha: valor
+        senha: valor,
+
+        // Campo do contrato da API (ConfirmacaoSenha), obrigatorio e conferido contra
+        // Senha. Omiti-lo faz o POST voltar 400 antes de qualquer coisa acontecer.
+        confirmacaoSenha: confirmacao
       })
         .done(function (r) {
           /*
