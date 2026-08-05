@@ -119,13 +119,59 @@
 
   $('#tabela-usuarios').on('click', '.btn-excluir', function () {
     var uuid = $(this).data('uuid');
+    var nome = $(this).data('nome');
+    var usuario = $(this).closest('tr').find('.btn-editar').data('usuario');
 
-    App.confirmarExclusao('o usuario ' + $(this).data('nome')).then(function (ok) {
+    App.confirmarExclusao('o usuario ' + nome).then(function (ok) {
       if (!ok) { return; }
 
       App.del('/api/usuarios/' + uuid)
         .done(function () { App.alerta('ok', 'Usuario excluido.'); carregar(); })
-        .fail(function (xhr) { App.tratarErro(xhr); });
+        .fail(function (xhr) {
+          var p = App.problema(xhr);
+
+          /*
+           * 409 aqui e quase sempre a mesma coisa: o usuario ja produziu registros de log,
+           * e loggers.user_id e RESTRICT -- apagar o autor destruiria a trilha. Na pratica
+           * quem ja usou o sistema nunca mais pode ser excluido.
+           *
+           * Um toast com "nao pode ser excluido" deixaria o operador sem saida, quando a
+           * saida existe e e outra: desativar. Oferece-la aqui evita que ele saia
+           * procurando um botao que nao vai encontrar.
+           */
+          if (p.status === 409 && usuario) {
+            Swal.fire({
+              title: 'Nao e possivel excluir',
+              text: p.detail,
+              icon: 'info',
+              showCancelButton: true,
+              confirmButtonText: 'Desativar o acesso',
+              cancelButtonText: 'Cancelar',
+              reverseButtons: true
+            }).then(function (r) {
+              if (!r.isConfirmed) { return; }
+
+              // Status 2 = Inactive. O usuario para de autenticar e o historico continua
+              // atribuivel a ele.
+              App.put('/api/usuarios/' + uuid, {
+                firstName: usuario.firstName,
+                lastName: usuario.lastName,
+                email: usuario.email,
+                phone: usuario.phone,
+                phoneWhats: !!usuario.phoneWhats,
+                level: usuario.level || 0,
+                master: !!usuario.master,
+                status: 2
+              })
+                .done(function () { App.alerta('ok', 'Acesso desativado.'); carregar(); })
+                .fail(function (x2) { App.tratarErro(x2); });
+            });
+
+            return;
+          }
+
+          App.tratarErro(xhr);
+        });
     });
   });
 
