@@ -1,0 +1,30 @@
+# ATENCAO -- este arquivo e uma REDE DE SEGURANCA, nao a configuracao correta.
+#
+# O certo e apontar o DocumentRoot (ou um VirtualHost) para a pasta public/, e entao nada
+# aqui e alcancavel pela web. Ver o README.
+#
+# Servido de dentro de htdocs, porem, http://localhost/leads/ chegaria a ESTA pasta -- e
+# .env, src/ e o historico do git ficariam legiveis por qualquer um. As regras abaixo
+# empurram tudo para public/ e negam o resto.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Ja esta em public/: deixa o .htaccess de la resolver.
+    RewriteRule ^public/ - [L]
+
+    RewriteRule ^$ public/ [L]
+    RewriteRule (.*) public/$1 [L]
+</IfModule>
+
+# Negacao explicita, para o caso de o mod_rewrite estar desligado. Sem ela, um servidor
+# sem rewrite serviria o .env como texto puro.
+<FilesMatch "^(\.env|\.env\..*|\.gitignore|\.gitattributes|composer\.(json|lock)|README\.md)$">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_alias.c>
+    RedirectMatch 404 /\.git
+</IfModule>
+
+Options -Indexes

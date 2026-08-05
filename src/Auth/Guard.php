@@ -1,0 +1,69 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Auth;
+
+use App\Http\Respond;
+
+/**
+ * Guardas de rota.
+ *
+ * O front NAO decide acesso -- a API decide. O que estas guardas fazem e evitar oferecer
+ * o que ja se sabe que sera negado, e mandar para o login quem nao tem sessao. Um 403 que
+ * escape daqui continua sendo tratado na tela, porque o front nao consegue prever tudo:
+ * nao existe endpoint que devolva as permissoes do proprio usuario.
+ */
+final class Guard
+{
+    /** Exige sessao viva. Sem ela, login -- com o motivo, para a tela poder explicar. */
+    public static function exigeLogin(bool $ehXhr): void
+    {
+        if (Session::autenticado()) {
+            return;
+        }
+
+        Session::encerrar();
+
+        if ($ehXhr) {
+            Respond::json([
+                'status' => 401,
+                'title'  => 'Sessao expirada',
+                'detail' => 'Faca login novamente para continuar.',
+            ], 401);
+        }
+
+        Respond::redirecionar('/login?motivo=expirado');
+    }
+
+    /**
+     * Exige papel Admin ou marca master -- a politica AdminOrMaster da API, espelhada
+     * aqui apenas para nao renderizar tela que responderia 403.
+     */
+    public static function exigeAdministrador(bool $ehXhr): void
+    {
+        self::exigeLogin($ehXhr);
+
+        if (Session::administra()) {
+            return;
+        }
+
+        if ($ehXhr) {
+            Respond::json([
+                'status' => 403,
+                'title'  => 'Acesso negado',
+                'detail' => 'Voce nao tem permissao para esta acao.',
+            ], 403);
+        }
+
+        Respond::redirecionar('/?erro=sem-permissao');
+    }
+
+    /** Quem ja esta logado nao ve tela de login. */
+    public static function exigeAnonimo(): void
+    {
+        if (Session::autenticado()) {
+            Respond::redirecionar('/');
+        }
+    }
+}

@@ -1,0 +1,27 @@
+# Front controller: tudo que nao for arquivo real vai para o index.php.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Arquivo ou diretorio existente e servido direto (assets, fontes, vendor).
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# O .env nunca deve estar nesta pasta, mas se alguem o copiar para ca por engano, a regra
+# abaixo evita que ele vire leitura publica. Defesa em profundidade custa duas linhas.
+<FilesMatch "^\.env">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "DENY"
+    Header set Referrer-Policy "same-origin"
+</IfModule>
+
+# Sem listagem de diretorio: assets/vendor/ exposto mostra versao exata de cada
+# biblioteca, que e o primeiro passo de quem procura uma vulneravel.
+Options -Indexes

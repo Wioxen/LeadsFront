@@ -1,0 +1,254 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Auth;
+
+use App\Config;
+
+/**
+ * Sessao do PHP: token, expiracao e claims.
+ *
+ * O accessToken vive AQUI e em nenhum outro lugar. Guarda-lo em localStorage ou
+ * sessionStorage o deixaria ao alcance de qualquer script injetado -- inclusive o de uma
+ * dependencia comprometida. O navegador so carrega o cookie HttpOnly, que o JavaScript
+ * nao enxerga.
+ */
+final class Session
+{
+    /**
+     * Nomes das claims de papel e email no payload.
+     *
+     * A API emite com ClaimTypes.Role/ClaimTypes.Email atraves do construtor de
+     * JwtSecurityToken -- caminho que NAO aplica o mapa de nomes curtos do
+     * JwtSecurityTokenHandler. O resultado e a URI longa dentro do JWT, e nao 'role'.
+     *
+     * As duas formas estao listadas de proposito: o dia em que a API limpar o mapa de
+     * saida, ou trocar para JsonWebTokenHandler, o nome vira o curto -- e este front
+     * continua funcionando sem alteracao.
+     */
+    private const CLAIMS_PAPEL = [
+        'http://schemas.microsoft.com/ws/2008/06/identity/claims/role',
+        'role',
+    ];
+
+    private const CLAIMS_EMAIL = [
+        'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress',
+        'email',
+    ];
+
+    public static function iniciar(): void
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            return;
+        }
+
+        session_name(Config::get('SESSION_NAME', 'crm_session'));
+
+        session_set_cookie_params([
+            'lifetime' => Config::int('SESSION_LIFETIME', 3600),
+            'path'     => '/',
+            'httponly' => true,
+            // Secure so quando a conexao e HTTPS: ligado em http://localhost, o navegador
+            // descarta o cookie e o login entra num laco silencioso de "credenciais ok,
+            // mas continua deslogado".
+            'secure'   => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+            // Lax, e nao Strict: com Strict o cookie nao acompanha a navegacao vinda do
+            // link de verificacao no email, e o usuario cai no login logo apos definir a
+            // senha.
+            'samesite' => 'Lax',
+        ]);
+
+        session_start();
+    }
+
+    /**
+     * Grava o TokenResponse devolvido por login, verify-account ou reset-password.
+     *
+     * @param array<string,mixed> $tokenResponse
+     */
+    public static function autenticar(array $tokenResponse): void
+    {
+        self::iniciar();
+
+        // Troca o id de sessao no momento em que o nivel de privilegio muda. Sem isso, um
+        // id fixado por um atacante antes do login continuaria valido depois dele.
+        session_regenerate_id(true);
+
+        $token = (string) ($tokenResponse['accessToken'] ?? '');
+
+        $_SESSION['access_token'] = $token;
+        $_SESSION['expires_at']   = self::paraTimestamp($tokenResponse['expiresAtUtc'] ?? null);
+        $_SESSION['claims']       = self::decodificar($token);
+    }
+
+    public static function autenticado(): bool
+    {
+        self::iniciar();
+
+        return isset($_SESSION['access_token']) && !self::tokenExpirado();
+    }
+
+    public static function token(): ?string
+    {
+        self::iniciar();
+
+        return $_SESSION['access_token'] ?? null;
+    }
+
+    /**
+     * Compara expiresAtUtc com o relogio. Sem token gravado tambem conta como expirado --
+     * quem pergunta quer saber se pode chamar a API, e a resposta nos dois casos e nao.
+     */
+    public static function tokenExpirado(): bool
+    {
+        self::iniciar();
+
+        if (!isset($_SESSION['access_token'], $_SESSION['expires_at'])) {
+            return true;
+        }
+
+        // Margem de 30s: uma requisicao que sai com o token no ultimo suspiro chega com
+        // ele vencido, e o usuario ve um erro que nao consegue reproduzir.
+        return time() >= ((int) $_SESSION['expires_at'] - 30);
+    }
+
+    public static function encerrar(): void
+    {
+        self::iniciar();
+
+        $_SESSION = [];
+
+        if (ini_get('session.use_cookies')) {
+            $p = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000, $p['path'], $p['domain'], $p['secure'], $p['httponly']);
+        }
+
+        session_destroy();
+    }
+
+    /** @return array<string,mixed> */
+    public static function claims(): array
+    {
+        self::iniciar();
+
+        return $_SESSION['claims'] ?? [];
+    }
+
+    public static function claim(string $nome, ?string $padrao = null): ?string
+    {
+        $valor = self::claims()[$nome] ?? null;
+
+        return is_scalar($valor) ? (string) $valor : $padrao;
+    }
+
+    public static function papel(): ?string
+    {
+        return self::primeiraClaim(self::CLAIMS_PAPEL);
+    }
+
+    public static function email(): ?string
+    {
+        return self::primeiraClaim(self::CLAIMS_EMAIL);
+    }
+
+    /**
+     * A claim 'master' viaja como STRING "true"/"false", nao como booleano JSON. Comparar
+     * pela veracidade do valor faria "false" passar, porque string nao vazia e verdadeira
+     * em PHP -- e o usuario comum receberia o menu administrativo inteiro.
+     */
+    public static function master(): bool
+    {
+        return strtolower((string) self::claim('master')) === 'true';
+    }
+
+    /**
+     * Alcanca os recursos administrativos: usuarios, perfis, permissoes e log.
+     *
+     * O teste e papel OU marca, nunca so o papel. Um master e 'Usuario' no papel, e olhar
+     * apenas para ele esconderia dele justamente as telas que ele existe para operar.
+     */
+    public static function administra(): bool
+    {
+        return self::papel() === 'Admin' || self::master();
+    }
+
+    public static function userUuid(): ?string
+    {
+        return self::claim('UserUuid');
+    }
+
+    /**
+     * Nome de exibicao. A API nao emite nome no token, entao o que ha e o email -- usar a
+     * parte antes do @ e melhor do que exibir o endereco inteiro na navbar.
+     */
+    public static function nomeExibicao(): string
+    {
+        $email = self::email();
+
+        if ($email === null || $email === '') {
+            return 'Usuario';
+        }
+
+        return ucfirst(explode('@', $email)[0]);
+    }
+
+    /** @param array<int,string> $nomes */
+    private static function primeiraClaim(array $nomes): ?string
+    {
+        foreach ($nomes as $nome) {
+            $valor = self::claim($nome);
+
+            if ($valor !== null && $valor !== '') {
+                return $valor;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Decodifica o payload SEM validar a assinatura, de proposito.
+     *
+     * A API e a unica autoridade sobre o token: ela o assinou e a revalida a cada
+     * requisicao. Um front que "confia" no que ele mesmo decodificou apenas duplica uma
+     * decisao que nao e dele -- e o que sai daqui serve so para montar a interface.
+     *
+     * @return array<string,mixed>
+     */
+    private static function decodificar(string $jwt): array
+    {
+        $partes = explode('.', $jwt);
+
+        if (count($partes) !== 3) {
+            return [];
+        }
+
+        $payload = base64_decode(strtr($partes[1], '-_', '+/'), false);
+
+        if ($payload === false) {
+            return [];
+        }
+
+        $claims = json_decode($payload, true);
+
+        return is_array($claims) ? $claims : [];
+    }
+
+    private static function paraTimestamp(mixed $expiresAtUtc): int
+    {
+        if (!is_string($expiresAtUtc) || $expiresAtUtc === '') {
+            return time();
+        }
+
+        // A API devolve em UTC. Sem forcar o fuso aqui, o strtotime interpretaria no fuso
+        // do servidor e a sessao venceria horas antes ou depois do que deveria.
+        $data = \DateTimeImmutable::createFromFormat(
+            'Y-m-d\TH:i:s.uP',
+            $expiresAtUtc,
+            new \DateTimeZone('UTC'),
+        ) ?: new \DateTimeImmutable($expiresAtUtc, new \DateTimeZone('UTC'));
+
+        return $data->getTimestamp();
+    }
+}

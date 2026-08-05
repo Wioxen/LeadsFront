@@ -1,0 +1,323 @@
+/*
+ * Componentes proprios, escritos SOBRE os tokens. Nenhum hex aqui.
+ */
+
+body {
+  font-family: var(--bs-font-sans-serif);
+  font-size: .875rem;          /* 16px numa tabela de CRM desperdica a largura dos dados */
+  background: var(--surface-body);
+  color: var(--text-primary);
+}
+
+/* Digito de largura fixa. Sem isto a coluna dança a cada atualizacao. */
+.num,
+.kpi-valor,
+table td.text-end,
+.table tbody td:last-child {
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Shell ------------------------------------------------------------------------- */
+
+.navbar-app {
+  height: var(--navbar-altura);
+  background: var(--surface-card);
+  border-bottom: 1px solid var(--border);
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1030;
+}
+
+.sidebar {
+  position: fixed;
+  top: var(--navbar-altura);
+  bottom: 0;
+  left: 0;
+  width: var(--sidebar-largura);
+  background: var(--surface-card);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  transition: width .15s ease-out;
+  z-index: 1020;
+}
+
+.sidebar .nav-link {
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  padding: .5rem .75rem;
+  margin: 2px var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  white-space: nowrap;
+}
+
+.sidebar .nav-link:hover {
+  background: var(--surface-muted);
+  color: var(--text-primary);
+}
+
+.sidebar .nav-link.active {
+  background: color-mix(in srgb, var(--brand-primary) 12%, transparent);
+  color: var(--brand-primary);
+  font-weight: 500;
+}
+
+.sidebar .nav-link i {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.sidebar-secao {
+  font-size: .6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--text-muted);
+  padding: var(--space-4) var(--space-4) var(--space-2);
+}
+
+.conteudo {
+  margin-top: var(--navbar-altura);
+  margin-left: var(--sidebar-largura);
+  padding: var(--space-6);
+  max-width: 1440px;                 /* container-fluid puro num 27" torna a linha ilegivel */
+  transition: margin-left .15s ease-out;
+}
+
+/* Recolhida: so icones. */
+body.sidebar-recolhida .sidebar { width: var(--sidebar-recolhida); }
+body.sidebar-recolhida .sidebar .rotulo,
+body.sidebar-recolhida .sidebar-secao { display: none; }
+body.sidebar-recolhida .sidebar .nav-link { justify-content: center; }
+body.sidebar-recolhida .conteudo { margin-left: var(--sidebar-recolhida); }
+
+/* Abaixo de 992px a sidebar vira offcanvas -- 72px de icones roubam largura que o
+   celular nao tem. */
+@media (max-width: 991.98px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform .2s ease-out;
+    width: var(--sidebar-largura);
+  }
+  .sidebar.aberta { transform: translateX(0); }
+  .conteudo { margin-left: 0; padding: var(--space-4); }
+  body.sidebar-recolhida .conteudo { margin-left: 0; }
+}
+
+/* --- Superficies -------------------------------------------------------------------- */
+
+.card {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.card-header {
+  background: transparent;
+  border-bottom: 1px solid var(--border);
+  padding: var(--space-4) var(--space-6);
+  font-weight: 600;
+}
+
+.card-body { padding: var(--space-6); }
+
+.modal-content,
+.dropdown-menu {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);        /* so o que flutua de fato sobre a pagina */
+}
+
+/* --- KPI ---------------------------------------------------------------------------- */
+
+.kpi-rotulo {
+  font-size: .8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+
+.kpi-valor {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+.kpi-variacao { font-size: .75rem; font-weight: 500; }
+.kpi-variacao.sobe { color: var(--brand-success); }
+.kpi-variacao.desce { color: var(--brand-danger); }
+
+/*
+ * Bloco que a API ainda nao sustenta. Fica VISIVEL e desabilitado, com a legenda do
+ * motivo -- preencher com zero seria indistinguivel de "nenhum ainda", e alguem tomaria
+ * decisao em cima disso.
+ */
+.bloqueado { position: relative; opacity: .55; }
+.bloqueado::after {
+  content: attr(data-motivo);
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: var(--space-2) var(--space-4);
+  font-size: .6875rem;
+  color: var(--text-secondary);
+  background: var(--surface-muted);
+  border-top: 1px dashed var(--border);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+/* --- Tabelas ------------------------------------------------------------------------ */
+
+.table { color: var(--text-primary); }
+
+.table > thead > tr > th {
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+  font-size: .8125rem;
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.table > tbody > tr > td {
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.table > tbody > tr:hover > td { background: var(--surface-muted); }
+
+/* --- Formulario --------------------------------------------------------------------- */
+
+.form-control, .form-select {
+  background: var(--surface-card);
+  border-color: var(--border);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  font-size: .875rem;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-primary) 18%, transparent);
+}
+
+.form-label {
+  font-size: .8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-1);
+}
+
+.btn { border-radius: var(--radius-sm); font-size: .875rem; font-weight: 500; }
+.btn-primary { background: var(--brand-primary); border-color: var(--brand-primary); }
+
+/* Foco visivel em tudo que recebe teclado. Nao remova para "limpar" o visual. */
+:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
+
+/* --- Estados ------------------------------------------------------------------------ */
+
+.skeleton {
+  background: linear-gradient(90deg,
+    var(--surface-muted) 25%,
+    color-mix(in srgb, var(--surface-muted) 60%, var(--surface-card)) 50%,
+    var(--surface-muted) 75%);
+  background-size: 200% 100%;
+  animation: skeleton 1.4s infinite;
+  border-radius: var(--radius-sm);
+  min-height: 1rem;
+}
+
+@keyframes skeleton {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+.estado-vazio {
+  text-align: center;
+  padding: var(--space-12) var(--space-6);
+  color: var(--text-secondary);
+}
+
+.estado-vazio i { font-size: 2.5rem; color: var(--text-muted); display: block; margin-bottom: var(--space-4); }
+
+/* --- Badges ------------------------------------------------------------------------- */
+
+/* Cor NUNCA e o unico sinal: todo badge leva rotulo em texto. */
+.badge-suave {
+  font-weight: 500;
+  font-size: .75rem;
+  padding: .25rem .5rem;
+  border-radius: var(--radius-sm);
+}
+
+.badge-suave.ok    { background: color-mix(in srgb, var(--brand-success) 14%, transparent); color: var(--brand-success); }
+.badge-suave.aviso { background: color-mix(in srgb, var(--brand-warning) 16%, transparent); color: var(--brand-warning); }
+.badge-suave.erro  { background: color-mix(in srgb, var(--brand-danger) 14%, transparent); color: var(--brand-danger); }
+.badge-suave.info  { background: color-mix(in srgb, var(--brand-primary) 14%, transparent); color: var(--brand-primary); }
+.badge-suave.neutro{ background: var(--surface-muted); color: var(--text-secondary); }
+
+/* --- Bibliotecas de terceiro seguindo os tokens -------------------------------------- */
+
+.select2-container--bootstrap-5 .select2-selection,
+.flatpickr-calendar,
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+  background: var(--surface-card) !important;
+  border-color: var(--border) !important;
+  color: var(--text-primary) !important;
+}
+
+.dataTables_wrapper .dataTables_filter input,
+.dataTables_wrapper .dataTables_length select {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  padding: .25rem .5rem;
+}
+
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter { color: var(--text-secondary); font-size: .8125rem; }
+
+/* --- Autenticacao ------------------------------------------------------------------- */
+
+.tela-auth {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6);
+  background: var(--surface-body);
+}
+
+.cartao-auth {
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-8);
+}
+
+/* --- Movimento ---------------------------------------------------------------------- */
+
+/*
+ * Obrigatorio, e nao cortesia: para parte dos usuarios, movimento na tela causa enjoo
+ * real. O AOS tambem e desligado por JS -- ele escreve estilo inline que esta regra nao
+ * alcanca.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

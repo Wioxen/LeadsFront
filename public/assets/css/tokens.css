@@ -1,0 +1,116 @@
+/*
+ * Tokens -- a UNICA fonte de cor, raio, sombra e espaco.
+ *
+ * Nenhum hex deve aparecer em outro arquivo. E o que torna o dark mode possivel sem
+ * reescrever componente algum: trocar o tema e trocar o valor da variavel, e todo
+ * componente ja le dela.
+ */
+
+:root,
+[data-bs-theme="light"] {
+  --brand-primary:  #2563EB;
+  --brand-success:  #10B981;
+  --brand-warning:  #F59E0B;
+  --brand-danger:   #EF4444;
+  --brand-dark:     #0F172A;
+
+  --surface-body:   #F8FAFC;
+  --surface-card:   #FFFFFF;
+  --surface-muted:  #F1F5F9;
+  --border:         #E2E8F0;
+
+  --text-primary:   #0F172A;
+  --text-secondary: #475569;
+  --text-muted:     #94A3B8;
+
+  --radius-sm: .5rem;
+  --radius-md: .75rem;
+  --radius-lg: 1rem;
+
+  --shadow-sm: 0 1px 2px rgb(15 23 42 / .04);
+  --shadow-md: 0 4px 12px rgb(15 23 42 / .06);
+  --shadow-lg: 0 12px 32px rgb(15 23 42 / .10);
+
+  /* Escala fixa. Valor fora dela e bug de layout, nao decisao de design. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  --sidebar-largura: 260px;
+  --sidebar-recolhida: 72px;
+  --navbar-altura: 64px;
+
+  /* Sobrescreve o Bootstrap na raiz, para componente nativo dele herdar os tokens. */
+  --bs-primary: var(--brand-primary);
+  --bs-body-bg: var(--surface-body);
+  --bs-body-color: var(--text-primary);
+  --bs-border-color: var(--border);
+  --bs-border-radius: var(--radius-sm);
+  --bs-font-sans-serif: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+[data-bs-theme="dark"] {
+  --surface-body:   #0F172A;
+  --surface-card:   #1E293B;
+  --surface-muted:  #334155;
+  --border:         #334155;
+
+  --text-primary:   #F1F5F9;
+  --text-secondary: #CBD5E1;
+  --text-muted:     #64748B;
+
+  /* Clareia: #2563EB sobre #1E293B nao alcanca contraste de texto. */
+  --brand-primary:  #3B82F6;
+
+  /*
+   * Sombra some no escuro -- a separacao passa a ser feita pela borda. Manter a sombra do
+   * tema claro aqui produz so uma mancha preta em volta do card.
+   */
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: 0 12px 32px rgb(0 0 0 / .40);
+
+  --bs-primary: var(--brand-primary);
+  --bs-body-bg: var(--surface-body);
+  --bs-body-color: var(--text-primary);
+  --bs-border-color: var(--border);
+}
+
+/*
+ * Inter servido localmente. Sem fonts.googleapis.com: uma tag de CDN transmite o IP de
+ * cada usuario a um terceiro a cada carregamento, e o ponto da arquitetura BFF e que o
+ * navegador so fale com a nossa origem.
+ *
+ * O arquivo woff2 vai em assets/fonts/ e esta fora do versionamento -- ver tools/vendor.ps1.
+ */
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/Inter-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
