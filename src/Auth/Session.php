@@ -145,11 +145,20 @@ final class Session
         $_SESSION['claims']       = self::decodificar($token);
     }
 
+    /**
+     * Ha uma sessao com token.
+     *
+     * NAO julga a validade do token -- isso e da API, e a resposta dela e o 401. Aqui a
+     * pergunta e outra e mais modesta: existe algo para enviar? Um token vencido chega ao
+     * servidor, volta 401 e o Router encerra a sessao e manda ao login.
+     */
     public static function autenticado(): bool
     {
         self::iniciar();
 
-        return isset($_SESSION['access_token']) && !self::tokenExpirado();
+        $token = $_SESSION['access_token'] ?? null;
+
+        return is_string($token) && $token !== '';
     }
 
     public static function token(): ?string
@@ -160,20 +169,21 @@ final class Session
     }
 
     /**
-     * Compara expiresAtUtc com o relogio. Sem token gravado tambem conta como expirado --
-     * quem pergunta quer saber se pode chamar a API, e a resposta nos dois casos e nao.
+     * Instante de expiracao do token, para EXIBICAO.
+     *
+     * Guardado porque a interface pode querer avisar ("sua sessao termina em 10 min"), e
+     * nao para decidir acesso. A decisao e da API: token vencido volta 401, o Router
+     * encerra a sessao e manda ao login.
+     *
+     * Nao ha refresh token nesta API. Sessao expirada significa login de novo.
      */
-    public static function tokenExpirado(): bool
+    public static function expiraEm(): ?int
     {
         self::iniciar();
 
-        if (!isset($_SESSION['access_token'], $_SESSION['expires_at'])) {
-            return true;
-        }
+        $quando = $_SESSION['expires_at'] ?? null;
 
-        // Margem de 30s: uma requisicao que sai com o token no ultimo suspiro chega com
-        // ele vencido, e o usuario ve um erro que nao consegue reproduzir.
-        return time() >= ((int) $_SESSION['expires_at'] - 30);
+        return is_int($quando) ? $quando : null;
     }
 
     public static function encerrar(): void

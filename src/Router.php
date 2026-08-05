@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App;
 
 use App\Auth\Csrf;
+use App\Auth\Session;
 use App\Http\ApiException;
 use App\Http\Respond;
 use App\Http\SessionExpiredException;
@@ -111,6 +112,31 @@ final class Router
 
             Respond::redirecionar('/login?motivo=expirado');
         } catch (ApiException $e) {
+            /*
+             * 401 da API e a palavra FINAL sobre a sessao.
+             *
+             * Quem decide se o token vale e quem o assinou. O front nao tem autoridade
+             * sobre isso -- e nem informacao: o token pode ter vencido, a chave de
+             * assinatura pode ter mudado, o usuario pode ter sido desativado. Todos
+             * chegam como 401, e todos terminam no mesmo lugar.
+             *
+             * Antes deste ramo o 401 caia na pagina de erro generica, com um "Erro 401" que
+             * nao dizia ao usuario o que fazer nem limpava a sessao morta.
+             */
+            if ($e->status() === 401) {
+                Session::encerrar();
+
+                if ($ehXhr) {
+                    Respond::json([
+                        'status' => 401,
+                        'title'  => 'Sessao expirada',
+                        'detail' => 'Faca login novamente para continuar.',
+                    ], 401);
+                }
+
+                Respond::redirecionar('/login?motivo=expirado');
+            }
+
             // O ProblemDetails da API atravessa intacto ate o navegador. O JavaScript
             // aprende UM contrato de erro, e o BFF nao vira tradutor com regra propria.
             if ($ehXhr) {

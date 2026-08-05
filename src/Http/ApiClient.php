@@ -48,15 +48,28 @@ final class ApiClient
         $token = null;
 
         if ($exigeToken) {
-            // ANTES de montar a requisicao. Deixar a chamada sair e tratar o 401 de volta
-            // custaria ao usuario o formulario inteiro que ele acabou de preencher.
-            if (Session::tokenExpirado()) {
+            $token = Session::token();
+
+            /*
+             * A UNICA guarda local: nao ha token nenhum. Nesse caso a requisicao seria
+             * anonima e voltaria 401 de qualquer forma -- so que depois de uma ida a rede.
+             *
+             * O que NAO se faz aqui e comparar o expiresAtUtc com o relogio para decidir
+             * se o token ainda vale. Quem assinou o token e quem julga se ele vale, e a
+             * resposta disso e o 401. Uma decisao local depende do relogio DESTE
+             * contentor: adiantado, ele desloga alguem com credencial boa; atrasado, deixa
+             * passar uma morta -- e nos dois casos discorda de quem tem autoridade.
+             *
+             * A checagem previa tambem nao poupava trabalho do usuario, que era a razao
+             * pela qual ela existia: ela roda no mesmo instante em que o 401 chegaria, na
+             * hora da requisicao. Um formulario preenchido durante a expiracao se perde
+             * igual nos dois caminhos.
+             */
+            if ($token === null || $token === '') {
                 Session::encerrar();
 
                 throw new SessionExpiredException();
             }
-
-            $token = Session::token();
         }
 
         $url = $this->baseUrl . '/' . ltrim($caminho, '/');
