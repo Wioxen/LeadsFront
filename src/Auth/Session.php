@@ -52,7 +52,7 @@ final class Session
             // Secure so quando a conexao e HTTPS: ligado em http://localhost, o navegador
             // descarta o cookie e o login entra num laco silencioso de "credenciais ok,
             // mas continua deslogado".
-            'secure'   => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+            'secure'   => self::conexaoSegura(),
             // Lax, e nao Strict: com Strict o cookie nao acompanha a navegacao vinda do
             // link de verificacao no email, e o usuario cai no login logo apos definir a
             // senha.
@@ -60,6 +60,45 @@ final class Session
         ]);
 
         session_start();
+    }
+
+    /**
+     * A conexao com o NAVEGADOR e HTTPS?
+     *
+     * <c>$_SERVER['HTTPS']</c> sozinho descreve o ultimo salto, e nao a conexao do usuario.
+     * Com nginx ou Cloudflare terminando o TLS, o PHP recebe a requisicao em http interno
+     * e aquela variavel vem vazia -- o cookie de sessao sairia SEM a marca Secure e
+     * passaria a poder trafegar em claro. E a falha classica de portar para producao um
+     * codigo escrito contra Apache com SSL direto.
+     *
+     * Por isso o X-Forwarded-Proto entra na decisao. Um cliente pode forjar esse cabecalho,
+     * mas so consegue empurrar a resposta para MAIS restritivo: dizer "https" quando o
+     * acesso e http faz o proprio navegador dele descartar o cookie. O sentido perigoso --
+     * suprimir o Secure -- exigiria remover o cabecalho que o proxy acrescenta, e quem
+     * consegue isso ja esta dentro da rede.
+     *
+     * O proxy deve, ainda assim, SOBRESCREVER o cabecalho em vez de repassar o do cliente.
+     * Ver deploy/nginx.conf.
+     */
+    private static function conexaoSegura(): bool
+    {
+        if (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off') {
+            return true;
+        }
+
+        $encaminhado = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '';
+
+        // Pode vir como lista quando ha mais de um proxy: "https, http". O primeiro
+        // descreve a conexao do usuario.
+        $primeiro = trim(explode(',', (string) $encaminhado)[0]);
+
+        if (strtolower($primeiro) === 'https') {
+            return true;
+        }
+
+        // Cloudflare acrescenta este quando o visitante chega por HTTPS.
+        return ($_SERVER['HTTP_CF_VISITOR'] ?? '') !== ''
+            && str_contains((string) $_SERVER['HTTP_CF_VISITOR'], '"https"');
     }
 
     /**
