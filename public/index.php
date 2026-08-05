@@ -20,6 +20,21 @@ use App\Controllers\ProfilesController;
 use App\Controllers\UsersController;
 use App\Router;
 
+/*
+ * Servidor embutido (php -S) apenas.
+ *
+ * Com um script de roteamento, ele manda TODA requisicao para ca -- inclusive /assets/*.
+ * Devolver false faz o proprio servidor entregar o arquivo estatico. Sob Apache isso nao
+ * acontece: o RewriteCond -f do .htaccess ja resolve antes de chegar aqui.
+ */
+if (PHP_SAPI === 'cli-server') {
+    $arquivo = __DIR__ . urldecode(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/');
+
+    if (is_file($arquivo)) {
+        return false;
+    }
+}
+
 $raiz = dirname(__DIR__);
 
 // Autoload por convencao de diretorio. App\Http\ApiClient -> src/Http/ApiClient.php.
