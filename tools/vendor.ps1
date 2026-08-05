@@ -32,9 +32,21 @@ $arquivos = @(
     @{ destino = 'bootstrap\bootstrap.min.css';                   url = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' }
     @{ destino = 'bootstrap\bootstrap.bundle.min.js';             url = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js' }
 
-    @{ destino = 'bootstrap-icons\bootstrap-icons.css';           url = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css' }
-    @{ destino = 'bootstrap-icons\fonts\bootstrap-icons.woff2';   url = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/fonts/bootstrap-icons.woff2' }
-    @{ destino = 'bootstrap-icons\fonts\bootstrap-icons.woff';    url = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/fonts/bootstrap-icons.woff' }
+    # Font Awesome 6, SO o traco solido.
+    #
+    # O all.min.css declara @font-face para solid, regular e brands -- tres arquivos, dos
+    # quais o projeto usa um. Carregar o nucleo mais a familia solida evita 250 KB de fonte
+    # que nenhum icone da aplicacao referencia.
+    #
+    # Substituiu o Bootstrap Icons, e nao conviveu com ele: duas fontes de icone na mesma
+    # pagina sao 380 KB a mais e duas linguagens visuais disputando a tela.
+    # A ESTRUTURA css/ + webfonts/ nao e arbitraria: o CSS referencia a fonte por caminho
+    # RELATIVO (../webfonts/fa-solid-900.woff2). Achatar as pastas faz esse caminho apontar
+    # para fora do diretorio, e o resultado e a pagina inteira sem icone algum -- sem erro
+    # de console que aponte para a causa.
+    @{ destino = 'fontawesome\css\fontawesome.min.css';           url = 'https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/fontawesome.min.css' }
+    @{ destino = 'fontawesome\css\solid.min.css';                 url = 'https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/css/solid.min.css' }
+    @{ destino = 'fontawesome\webfonts\fa-solid-900.woff2';       url = 'https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.2/webfonts/fa-solid-900.woff2' }
 
     @{ destino = 'datatables\jquery.dataTables.min.js';           url = 'https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js' }
     @{ destino = 'datatables\dataTables.bootstrap5.min.js';       url = 'https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js' }

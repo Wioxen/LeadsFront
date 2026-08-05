@@ -8,11 +8,11 @@ use App\View;
 <nav class="navbar-app d-flex align-items-center px-3 gap-3">
 
     <button class="btn btn-sm border-0" id="btn-sidebar" type="button" aria-label="Alternar menu">
-        <i class="bi bi-list fs-5"></i>
+        <i class="fa-solid fa-bars fs-5"></i>
     </button>
 
     <a href="/" class="d-flex align-items-center gap-2 text-decoration-none">
-        <i class="bi bi-kanban fs-5" style="color: var(--brand-primary)"></i>
+        <i class="fa-solid fa-layer-group fs-5" style="color: var(--brand-primary)"></i>
         <span class="fw-semibold" style="color: var(--text-primary)">CRM</span>
     </a>
 
@@ -29,14 +29,14 @@ use App\View;
     ?>
     <?php if ($tenantUuid !== null) : ?>
         <span class="badge-suave neutro d-none d-md-inline" title="Organizacao <?= View::e($tenantUuid) ?>">
-            <i class="bi bi-building me-1"></i>org <?= View::e(substr($tenantUuid, 0, 8)) ?>
+            <i class="fa-solid fa-building me-1"></i>org <?= View::e(substr($tenantUuid, 0, 8)) ?>
         </span>
     <?php endif; ?>
 
     <div class="ms-auto d-flex align-items-center gap-2">
 
         <button class="btn btn-sm border-0" id="btn-tema" type="button" aria-label="Alternar tema">
-            <i class="bi bi-moon-stars"></i>
+            <i class="fa-solid fa-moon"></i>
         </button>
 
         <div class="dropdown">
@@ -46,7 +46,7 @@ use App\View;
                     <?= View::e(mb_strtoupper(mb_substr($usuarioNome, 0, 1))) ?>
                 </span>
                 <span class="d-none d-md-inline" style="color: var(--text-primary)"><?= View::e($usuarioNome) ?></span>
-                <i class="bi bi-chevron-down small"></i>
+                <i class="fa-solid fa-chevron-down small"></i>
             </button>
 
             <ul class="dropdown-menu dropdown-menu-end">
@@ -63,7 +63,7 @@ use App\View;
                 <li><hr class="dropdown-divider"></li>
                 <li>
                     <a class="dropdown-item text-danger" href="/logout">
-                        <i class="bi bi-box-arrow-right me-2"></i>Sair
+                        <i class="fa-solid fa-right-from-bracket me-2"></i>Sair
                     </a>
                 </li>
             </ul>

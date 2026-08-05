@@ -65,7 +65,7 @@
     if (vazio) {
       // Serie vazia nao e grafico vazio: eixos soltos parecem defeito.
       $('#grafico-mensal').html(
-        '<div class="estado-vazio"><i class="bi bi-bar-chart"></i>' +
+        '<div class="estado-vazio"><i class="fa-solid fa-chart-column"></i>' +
         'Nenhum lead cadastrado nos ultimos 12 meses.</div>'
       );
       return;
@@ -107,7 +107,7 @@
   function renderUltimos(lista) {
     if (!lista.length) {
       $('#ultimos-leads').html(
-        '<div class="estado-vazio"><i class="bi bi-people"></i>' +
+        '<div class="estado-vazio"><i class="fa-solid fa-users"></i>' +
         'Nenhum lead cadastrado ainda.' +
         '<div class="mt-3"><a href="/leads?novo=1" class="btn btn-primary btn-sm">Cadastrar o primeiro</a></div></div>'
       );
@@ -138,7 +138,7 @@
     }
 
     if (!lista || !lista.length) {
-      $alvo.html('<div class="estado-vazio py-4"><i class="bi bi-journal"></i>Nenhum evento registrado.</div>');
+      $alvo.html('<div class="estado-vazio py-4"><i class="fa-solid fa-file-lines"></i>Nenhum evento registrado.</div>');
       return;
     }
 
@@ -185,7 +185,7 @@
         var p = App.problema(xhr);
 
         $('#ultimos-leads').html(
-          '<div class="estado-vazio"><i class="bi bi-exclamation-triangle"></i>' +
+          '<div class="estado-vazio"><i class="fa-solid fa-triangle-exclamation"></i>' +
           App.escapar(p.detail || p.title) +
           (p.traceId ? '<div class="small mt-1" style="color:var(--text-muted)">traceId: ' +
             App.escapar(p.traceId) + '</div>' : '') +

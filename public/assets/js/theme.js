@@ -41,7 +41,7 @@ window.Tema = (function () {
     var icone = document.querySelector('#btn-tema i');
 
     if (icone) {
-      icone.className = tema === 'dark' ? 'bi bi-sun' : 'bi bi-moon-stars';
+      icone.className = tema === 'dark' ? 'bi fa-sun' : 'bi fa-moon';
     }
   }
 

@@ -31,11 +31,11 @@
             'data-uuid="' + App.escapar(l.uuid) + '" ' +
             'data-name="' + App.escapar(l.name) + '" ' +
             'data-email="' + App.escapar(l.email) + '" title="Editar">' +
-            '<i class="bi bi-pencil"></i></button> ' +
+            '<i class="fa-solid fa-pen-to-square"></i></button> ' +
           '<button class="btn btn-sm btn-outline-danger btn-excluir" ' +
             'data-uuid="' + App.escapar(l.uuid) + '" ' +
             'data-name="' + App.escapar(l.name) + '" title="Excluir">' +
-            '<i class="bi bi-trash"></i></button>' +
+            '<i class="fa-solid fa-trash-can"></i></button>' +
         '</div>'
       ];
     });
@@ -69,7 +69,7 @@
         // endpoint que devolva as permissoes do proprio usuario, entao o front nao tinha
         // como esconder o botao antes.
         $('#area-tabela').html(
-          '<div class="estado-vazio"><i class="bi bi-shield-exclamation"></i>' +
+          '<div class="estado-vazio"><i class="fa-solid fa-shield-halved"></i>' +
           (p.status === 403
             ? 'Voce nao tem permissao para listar leads. Peca a um administrador que inclua a permissao no seu perfil.'
             : App.escapar(p.detail || p.title)) +

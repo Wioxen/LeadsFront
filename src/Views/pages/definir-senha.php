@@ -16,7 +16,7 @@ use App\View;
 <div class="cartao-auth animate__animated animate__fadeIn">
 
     <div class="text-center mb-4">
-        <i class="bi bi-shield-check" style="font-size:2rem;color:var(--brand-success)"></i>
+        <i class="fa-solid fa-circle-check" style="font-size:2rem;color:var(--brand-success)"></i>
         <h1 class="h5 fw-semibold mt-2 mb-1"><?= View::e($titulo) ?></h1>
         <p class="small mb-0" style="color:var(--text-secondary)">
             Escolha a senha que voce usara para entrar

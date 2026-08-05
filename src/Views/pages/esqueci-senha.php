@@ -12,7 +12,7 @@
 <div class="cartao-auth animate__animated animate__fadeIn">
 
     <div class="text-center mb-4">
-        <i class="bi bi-key" style="font-size:2rem;color:var(--brand-primary)"></i>
+        <i class="fa-solid fa-key" style="font-size:2rem;color:var(--brand-primary)"></i>
         <h1 class="h5 fw-semibold mt-2 mb-1">Recuperar acesso</h1>
         <p class="small mb-0" style="color:var(--text-secondary)">
             Enviaremos um link para voce definir uma senha nova
@@ -21,7 +21,7 @@
 
     <div id="resultado" class="d-none">
         <div class="alert alert-success py-3 small text-center">
-            <i class="bi bi-envelope-check d-block mb-2" style="font-size:1.5rem"></i>
+            <i class="fa-solid fa-envelope-circle-check d-block mb-2" style="font-size:1.5rem"></i>
             <span id="resultado-texto"></span>
         </div>
         <a href="/login" class="btn btn-outline-secondary btn-sm w-100">Voltar ao login</a>

@@ -48,7 +48,7 @@
         ? ''
         : '<button class="btn btn-sm btn-outline-secondary btn-reenviar" data-uuid="' +
           App.escapar(u.uuid) + '" data-email="' + App.escapar(u.email) +
-          '" title="Reenviar email de verificacao"><i class="bi bi-envelope-arrow-up"></i></button> ';
+          '" title="Reenviar email de verificacao"><i class="fa-solid fa-paper-plane"></i></button> ';
 
       /*
        * Master nao tem perfil, e nao pode ter: a API recusa o vinculo com 409, porque as
@@ -63,7 +63,7 @@
         ? ''
         : '<button class="btn btn-sm btn-outline-secondary btn-perfis" data-uuid="' + App.escapar(u.uuid) +
           '" data-nome="' + nome + '" title="Perfis">' +
-          '<i class="bi bi-shield-lock"></i></button> ';
+          '<i class="fa-solid fa-user-shield"></i></button> ';
 
       return [
         nome,
@@ -74,9 +74,9 @@
           reenviar +
           perfis +
           '<button class="btn btn-sm btn-outline-secondary btn-editar" data-usuario=\'' +
-            App.escapar(JSON.stringify(u)) + '\' title="Editar"><i class="bi bi-pencil"></i></button> ' +
+            App.escapar(JSON.stringify(u)) + '\' title="Editar"><i class="fa-solid fa-pen-to-square"></i></button> ' +
           '<button class="btn btn-sm btn-outline-danger btn-excluir" data-uuid="' + App.escapar(u.uuid) +
-            '" data-nome="' + nome + '" title="Excluir"><i class="bi bi-trash"></i></button>' +
+            '" data-nome="' + nome + '" title="Excluir"><i class="fa-solid fa-trash-can"></i></button>' +
         '</div>'
       ];
     });
@@ -97,7 +97,7 @@
         if (xhr.status === 401) { return; }
 
         var p = App.problema(xhr);
-        $('#area-tabela').html('<div class="estado-vazio"><i class="bi bi-exclamation-triangle"></i>' +
+        $('#area-tabela').html('<div class="estado-vazio"><i class="fa-solid fa-triangle-exclamation"></i>' +
           App.escapar(p.detail || p.title) + '</div>');
       });
   }
@@ -161,7 +161,7 @@
         .fail(function (xhr) { App.tratarErro(xhr); })
         .always(function () {
           $botao.prop('disabled', false);
-          $icone.attr('class', 'bi bi-envelope-arrow-up');
+          $icone.attr('class', 'bi fa-paper-plane');
         });
     });
   });
@@ -300,7 +300,7 @@
         var vinculados = (doUsuario[0].dados || []).map(function (p) { return p.id; });
 
         if (!perfisDisponiveis.length) {
-          $('#perfis-lista').html('<div class="estado-vazio py-4"><i class="bi bi-shield"></i>' +
+          $('#perfis-lista').html('<div class="estado-vazio py-4"><i class="fa-solid fa-shield-halved"></i>' +
             'Nenhum perfil cadastrado.</div>');
           return;
         }

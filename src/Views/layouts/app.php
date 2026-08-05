@@ -30,7 +30,8 @@ use App\View;
 </script>
 
 <link rel="stylesheet" href="/assets/vendor/bootstrap/bootstrap.min.css">
-<link rel="stylesheet" href="/assets/vendor/bootstrap-icons/bootstrap-icons.css">
+<link rel="stylesheet" href="/assets/vendor/fontawesome/css/fontawesome.min.css">
+<link rel="stylesheet" href="/assets/vendor/fontawesome/css/solid.min.css">
 <link rel="stylesheet" href="/assets/vendor/datatables/dataTables.bootstrap5.min.css">
 <!-- Sem este CSS o controle que reabre as colunas escondidas fica invisivel, e no celular
      as acoes do CRUD somem sem deixar caminho de volta. -->

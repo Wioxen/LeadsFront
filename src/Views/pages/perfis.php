@@ -7,12 +7,12 @@
     </div>
 
     <button class="btn btn-primary btn-sm ms-auto" id="btn-novo">
-        <i class="bi bi-plus-lg me-1"></i>Novo perfil
+        <i class="fa-solid fa-plus me-1"></i>Novo perfil
     </button>
 </div>
 
 <div class="alert alert-info py-2 small">
-    <i class="bi bi-info-circle me-1"></i>
+    <i class="fa-solid fa-circle-info me-1"></i>
     Perfis governam apenas o <strong>Usuario comum</strong>. Quem tem papel Admin ou a marca
     master alcanca o sistema inteiro sem depender de vinculo algum.
 </div>

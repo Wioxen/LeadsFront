@@ -11,7 +11,7 @@ use App\View;
     </div>
 
     <button class="btn btn-primary btn-sm ms-auto" id="btn-novo">
-        <i class="bi bi-plus-lg me-1"></i>Novo usuario
+        <i class="fa-solid fa-plus me-1"></i>Novo usuario
     </button>
 </div>
 
@@ -107,7 +107,7 @@ use App\View;
                             </label>
                         </div>
                         <div class="alert alert-warning py-2 small mt-2 mb-0 d-none" id="aviso-master">
-                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            <i class="fa-solid fa-triangle-exclamation me-1"></i>
                             Master e perfil sao <strong>excludentes</strong>. Este usuario tem perfis
                             vinculados: remova-os antes de marca-lo como master.
                         </div>

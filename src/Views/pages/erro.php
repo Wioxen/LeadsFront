@@ -8,14 +8,14 @@ $acaoUrl = $acaoUrl ?? null;
 $acaoTexto = $acaoTexto ?? null;
 
 $icone = match (true) {
-    $status === 404 => 'bi-compass',
-    $status === 403 => 'bi-shield-lock',
-    $status >= 500  => 'bi-exclamation-octagon',
-    default         => 'bi-exclamation-triangle',
+    $status === 404 => 'fa-compass',
+    $status === 403 => 'fa-user-shield',
+    $status >= 500  => 'fa-circle-exclamation',
+    default         => 'fa-triangle-exclamation',
 };
 ?>
 <div class="cartao-auth text-center">
-    <i class="bi <?= View::e($icone) ?>" style="font-size:2.5rem;color:var(--text-muted)"></i>
+    <i class="fa-solid <?= View::e($icone) ?>" style="font-size:2.5rem;color:var(--text-muted)"></i>
 
     <h1 class="h5 fw-semibold mt-3 mb-2"><?= View::e($status) ?></h1>
 

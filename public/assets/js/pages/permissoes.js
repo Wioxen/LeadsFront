@@ -17,7 +17,7 @@
       .fail(function (xhr) {
         if (xhr.status === 401) { return; }
         var p = App.problema(xhr);
-        $('#area-tabela').html('<div class="estado-vazio"><i class="bi bi-exclamation-triangle"></i>' +
+        $('#area-tabela').html('<div class="estado-vazio"><i class="fa-solid fa-triangle-exclamation"></i>' +
           App.escapar(p.detail || p.title) + '</div>');
       });
   }
@@ -47,7 +47,7 @@
           situacao,
           '<div class="acoes-linha"><button class="btn btn-sm btn-outline-secondary btn-editar" ' +
             'data-permissao=\'' + App.escapar(JSON.stringify(p)) + '\' title="Editar rotulos">' +
-            '<i class="bi bi-pencil"></i></button></div>'
+            '<i class="fa-solid fa-pen-to-square"></i></button></div>'
         ];
       }),
       language: { emptyTable: 'Nenhuma permissao no catalogo.' }

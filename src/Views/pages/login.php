@@ -13,7 +13,7 @@ $email = $email ?? '';
 <div class="cartao-auth animate__animated animate__fadeIn">
 
     <div class="text-center mb-4">
-        <i class="bi bi-kanban" style="font-size:2rem;color:var(--brand-primary)"></i>
+        <i class="fa-solid fa-layer-group" style="font-size:2rem;color:var(--brand-primary)"></i>
         <h1 class="h5 fw-semibold mt-2 mb-1">Entrar no CRM</h1>
         <p class="small mb-0" style="color:var(--text-secondary)">Acesse com sua conta da organizacao</p>
     </div>

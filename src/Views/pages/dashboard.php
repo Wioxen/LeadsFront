@@ -25,13 +25,13 @@ $semPermissao = $semPermissao ?? false;
             <button type="button" class="btn btn-outline-secondary" data-periodo="90">90d</button>
         </div>
         <a href="/leads?novo=1" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-lg me-1"></i>Novo lead
+            <i class="fa-solid fa-plus me-1"></i>Novo lead
         </a>
     </div>
 </div>
 
 <div id="aviso-escala" class="alert alert-warning py-2 small d-none">
-    <i class="bi bi-exclamation-triangle me-1"></i>
+    <i class="fa-solid fa-triangle-exclamation me-1"></i>
     <span></span>
 </div>
 
@@ -97,7 +97,7 @@ $semPermissao = $semPermissao ?? false;
             <div class="card-header">Leads por origem</div>
             <div class="card-body d-grid" style="height:280px;place-items:center">
                 <div class="text-center">
-                    <i class="bi bi-pie-chart" style="font-size:2rem;color:var(--text-muted)"></i>
+                    <i class="fa-solid fa-chart-pie" style="font-size:2rem;color:var(--text-muted)"></i>
                     <p class="small mt-2 mb-0" style="color:var(--text-secondary)">
                         O lead nao tem campo de origem.
                     </p>
@@ -111,7 +111,7 @@ $semPermissao = $semPermissao ?? false;
             <div class="card-header">Funil de vendas</div>
             <div class="card-body d-grid" style="height:260px;place-items:center">
                 <div class="text-center">
-                    <i class="bi bi-filter" style="font-size:2rem;color:var(--text-muted)"></i>
+                    <i class="fa-solid fa-filter" style="font-size:2rem;color:var(--text-muted)"></i>
                     <p class="small mt-2 mb-0" style="color:var(--text-secondary)">
                         Nao ha etapas cadastradas no lead.
                     </p>
@@ -125,7 +125,7 @@ $semPermissao = $semPermissao ?? false;
             <div class="card-header">Conversoes</div>
             <div class="card-body d-grid" style="height:260px;place-items:center">
                 <div class="text-center">
-                    <i class="bi bi-graph-up-arrow" style="font-size:2rem;color:var(--text-muted)"></i>
+                    <i class="fa-solid fa-arrow-trend-up" style="font-size:2rem;color:var(--text-muted)"></i>
                     <p class="small mt-2 mb-0" style="color:var(--text-secondary)">
                         Sem status, nao ha conversao a medir.
                     </p>
@@ -169,7 +169,7 @@ $semPermissao = $semPermissao ?? false;
                 </div>
                 <div class="card-body pt-0">
                     <p class="small mb-0" style="color:var(--text-muted)">
-                        <i class="bi bi-info-circle me-1"></i>
+                        <i class="fa-solid fa-circle-info me-1"></i>
                         Eventos anonimos nao aparecem aqui -- login recusado, recuperacao de
                         senha e jobs ficam so no console do servidor.
                     </p>
@@ -181,7 +181,7 @@ $semPermissao = $semPermissao ?? false;
             <div class="card-header">Agenda e proximas tarefas</div>
             <div class="card-body d-grid" style="height:180px;place-items:center">
                 <div class="text-center">
-                    <i class="bi bi-calendar-event" style="font-size:2rem;color:var(--text-muted)"></i>
+                    <i class="fa-solid fa-calendar-day" style="font-size:2rem;color:var(--text-muted)"></i>
                     <p class="small mt-2 mb-0" style="color:var(--text-secondary)">
                         A API nao tem recurso de tarefas.
                     </p>

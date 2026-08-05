@@ -17,14 +17,14 @@ use App\View;
  */
 
 $itens = [
-    ['rota' => '/',      'pagina' => 'dashboard', 'icone' => 'bi-speedometer2', 'rotulo' => 'Dashboard'],
-    ['rota' => '/leads', 'pagina' => 'leads',     'icone' => 'bi-people',       'rotulo' => 'Leads'],
+    ['rota' => '/',      'pagina' => 'dashboard', 'icone' => 'fa-gauge-high', 'rotulo' => 'Dashboard'],
+    ['rota' => '/leads', 'pagina' => 'leads',     'icone' => 'fa-users',       'rotulo' => 'Leads'],
 ];
 
 $administrativos = [
-    ['rota' => '/usuarios',   'pagina' => 'usuarios',   'icone' => 'bi-person-gear',   'rotulo' => 'Usuarios'],
-    ['rota' => '/perfis',     'pagina' => 'perfis',     'icone' => 'bi-shield-lock',   'rotulo' => 'Perfis'],
-    ['rota' => '/logs',       'pagina' => 'logs',       'icone' => 'bi-journal-text',  'rotulo' => 'Registros de log'],
+    ['rota' => '/usuarios',   'pagina' => 'usuarios',   'icone' => 'fa-users-gear',   'rotulo' => 'Usuarios'],
+    ['rota' => '/perfis',     'pagina' => 'perfis',     'icone' => 'fa-user-shield',   'rotulo' => 'Perfis'],
+    ['rota' => '/logs',       'pagina' => 'logs',       'icone' => 'fa-rectangle-list',  'rotulo' => 'Registros de log'],
 ];
 
 /*
@@ -33,7 +33,7 @@ $administrativos = [
  * se chamam -- o rotulo que ele escrevesse valeria para todos os outros.
  */
 $somenteAdmin = [
-    ['rota' => '/permissoes', 'pagina' => 'permissoes', 'icone' => 'bi-key', 'rotulo' => 'Permissoes'],
+    ['rota' => '/permissoes', 'pagina' => 'permissoes', 'icone' => 'fa-key', 'rotulo' => 'Permissoes'],
 ];
 ?>
 <aside class="sidebar">
@@ -43,7 +43,7 @@ $somenteAdmin = [
             <a class="nav-link <?= $pagina === $item['pagina'] ? 'active' : '' ?>"
                href="<?= View::e($item['rota']) ?>"
                title="<?= View::e($item['rotulo']) ?>">
-                <i class="bi <?= View::e($item['icone']) ?>"></i>
+                <i class="fa-solid <?= View::e($item['icone']) ?>"></i>
                 <span class="rotulo"><?= View::e($item['rotulo']) ?></span>
             </a>
         <?php endforeach; ?>
@@ -55,7 +55,7 @@ $somenteAdmin = [
                 <a class="nav-link <?= $pagina === $item['pagina'] ? 'active' : '' ?>"
                    href="<?= View::e($item['rota']) ?>"
                    title="<?= View::e($item['rotulo']) ?>">
-                    <i class="bi <?= View::e($item['icone']) ?>"></i>
+                    <i class="fa-solid <?= View::e($item['icone']) ?>"></i>
                     <span class="rotulo"><?= View::e($item['rotulo']) ?></span>
                 </a>
             <?php endforeach; ?>
@@ -65,7 +65,7 @@ $somenteAdmin = [
                     <a class="nav-link <?= $pagina === $item['pagina'] ? 'active' : '' ?>"
                        href="<?= View::e($item['rota']) ?>"
                        title="<?= View::e($item['rotulo']) ?>">
-                        <i class="bi <?= View::e($item['icone']) ?>"></i>
+                        <i class="fa-solid <?= View::e($item['icone']) ?>"></i>
                         <span class="rotulo"><?= View::e($item['rotulo']) ?></span>
                     </a>
                 <?php endforeach; ?>

@@ -17,7 +17,7 @@
  */
 ?>
 <div class="alert alert-info py-2 small">
-    <i class="bi bi-info-circle me-1"></i>
+    <i class="fa-solid fa-circle-info me-1"></i>
     <strong>Eventos anonimos nao aparecem aqui.</strong>
     Login recusado, recuperacao de senha, verificacao de conta e os jobs de email ficam
     apenas no console do servidor &mdash; nenhum deles tem usuario e organizacao resolvidos

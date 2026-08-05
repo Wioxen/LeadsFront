@@ -30,7 +30,8 @@ use App\View;
 </script>
 
 <link rel="stylesheet" href="/assets/vendor/bootstrap/bootstrap.min.css">
-<link rel="stylesheet" href="/assets/vendor/bootstrap-icons/bootstrap-icons.css">
+<link rel="stylesheet" href="/assets/vendor/fontawesome/css/fontawesome.min.css">
+<link rel="stylesheet" href="/assets/vendor/fontawesome/css/solid.min.css">
 <link rel="stylesheet" href="/assets/vendor/toastify/toastify.min.css">
 <link rel="stylesheet" href="/assets/vendor/animate/animate.min.css">
 <link rel="stylesheet" href="/assets/css/tokens.css">

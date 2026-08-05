@@ -9,7 +9,7 @@ use App\View;
     </div>
 
     <button class="btn btn-primary btn-sm ms-auto" id="btn-novo">
-        <i class="bi bi-plus-lg me-1"></i>Novo lead
+        <i class="fa-solid fa-plus me-1"></i>Novo lead
     </button>
 </div>
 

@@ -73,7 +73,7 @@
       .fail(function (xhr) {
         if (xhr.status === 401) { return; }
         var p = App.problema(xhr);
-        $('#area-tabela').html('<div class="estado-vazio"><i class="bi bi-exclamation-triangle"></i>' +
+        $('#area-tabela').html('<div class="estado-vazio"><i class="fa-solid fa-triangle-exclamation"></i>' +
           App.escapar(p.detail || p.title) + '</div>');
       });
   });

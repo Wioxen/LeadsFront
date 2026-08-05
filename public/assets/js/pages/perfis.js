@@ -34,10 +34,10 @@
         // Desabilitar o botao evita o usuario descobrir isso pelo erro.
         var excluir = p.isSystem
           ? '<button class="btn btn-sm btn-outline-secondary" disabled ' +
-            'title="Perfil de sistema nao pode ser excluido"><i class="bi bi-trash"></i></button>'
+            'title="Perfil de sistema nao pode ser excluido"><i class="fa-solid fa-trash-can"></i></button>'
           : '<button class="btn btn-sm btn-outline-danger btn-excluir" data-uuid="' +
             App.escapar(p.uuid) + '" data-nome="' + App.escapar(p.name) +
-            '" title="Excluir"><i class="bi bi-trash"></i></button>';
+            '" title="Excluir"><i class="fa-solid fa-trash-can"></i></button>';
 
         return [
           App.escapar(p.name) + sistema,
@@ -48,7 +48,7 @@
             : '<span class="badge-suave neutro">Inativo</span>',
           '<div class="acoes-linha">' +
             '<button class="btn btn-sm btn-outline-secondary btn-editar" data-uuid="' +
-              App.escapar(p.uuid) + '" title="Editar"><i class="bi bi-pencil"></i></button> ' +
+              App.escapar(p.uuid) + '" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button> ' +
             excluir +
           '</div>'
         ];
@@ -63,7 +63,7 @@
       .fail(function (xhr) {
         if (xhr.status === 401) { return; }
         var p = App.problema(xhr);
-        $('#area-tabela').html('<div class="estado-vazio"><i class="bi bi-exclamation-triangle"></i>' +
+        $('#area-tabela').html('<div class="estado-vazio"><i class="fa-solid fa-triangle-exclamation"></i>' +
           App.escapar(p.detail || p.title) + '</div>');
       });
   }

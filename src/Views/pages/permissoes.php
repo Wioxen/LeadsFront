@@ -13,7 +13,7 @@
 </div>
 
 <div class="alert alert-info py-2 small">
-    <i class="bi bi-info-circle me-1"></i>
+    <i class="fa-solid fa-circle-info me-1"></i>
     Nao ha cadastro nem exclusao aqui: o catalogo vem do <strong>codigo</strong> da API. Esta
     tela edita apenas os rotulos amigaveis e a visibilidade &mdash; <code>controller</code>,
     <code>action</code> e <code>isActive</code> sao do servidor.
