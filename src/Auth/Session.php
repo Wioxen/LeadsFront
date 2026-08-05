@@ -45,8 +45,32 @@ final class Session
 
         session_name(Config::get('SESSION_NAME', 'crm_session'));
 
+        /*
+         * A sessao do PHP tem de durar AO MENOS o que dura o token, senao ela vence antes e
+         * derruba o usuario com uma credencial ainda valida na mao.
+         *
+         * O padrao acompanha o Jwt_ExpiresInSeconds da API (86400). Se voce aumentar a
+         * validade do token la, aumente esta aqui junto -- o contrario e inofensivo, porque
+         * o ApiClient confere o expiresAtUtc antes de cada chamada e manda ao login assim
+         * que o token vence.
+         */
+        $duracao = Config::int('SESSION_LIFETIME', 86400);
+
+        /*
+         * ESTE e o que derruba a sessao cedo, e nao o cookie.
+         *
+         * O coletor do PHP apaga o arquivo de sessao depois de session.gc_maxlifetime sem
+         * acesso -- e o padrao dele e 1440 segundos, VINTE E QUATRO MINUTOS. O cookie
+         * continua no navegador, com a validade que pedimos, mas do lado do servidor nao
+         * ha mais nada para ele apontar: o usuario e deslogado no meio do trabalho, sem
+         * relacao alguma com a validade do JWT.
+         *
+         * Precisa vir ANTES do session_start: depois disso o valor ja foi lido.
+         */
+        ini_set('session.gc_maxlifetime', (string) $duracao);
+
         session_set_cookie_params([
-            'lifetime' => Config::int('SESSION_LIFETIME', 3600),
+            'lifetime' => $duracao,
             'path'     => '/',
             'httponly' => true,
             // Secure so quando a conexao e HTTPS: ligado em http://localhost, o navegador
