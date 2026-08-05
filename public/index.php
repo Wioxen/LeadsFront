@@ -139,6 +139,7 @@ $router->put('/api/usuarios/{uuid}', [UsersController::class, 'atualizar']);
 $router->delete('/api/usuarios/{uuid}', [UsersController::class, 'excluir']);
 $router->get('/api/usuarios/{uuid}/perfis', [UsersController::class, 'perfis']);
 $router->put('/api/usuarios/{uuid}/perfis', [UsersController::class, 'substituirPerfis']);
+$router->post('/api/usuarios/{uuid}/reenviar-verificacao', [UsersController::class, 'reenviarVerificacao']);
 
 $router->get('/perfis', [ProfilesController::class, 'index']);
 $router->get('/api/perfis', [ProfilesController::class, 'listar']);

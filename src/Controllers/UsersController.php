@@ -69,6 +69,45 @@ final class UsersController extends Controller
         $this->json(['removido' => true]);
     }
 
+    /**
+     * Reenvia o email de verificacao de um usuario especifico.
+     *
+     * O endereco NAO vem do navegador: e resolvido aqui, a partir do uuid, por uma consulta
+     * que passa pelo query filter da API. Aceitar o email do corpo transformaria esta rota
+     * autenticada num disparador de email para qualquer endereco -- o mesmo efeito da tela
+     * publica, so que sem o proposito dela.
+     *
+     * A API responde 202 exista a conta pendente ou nao. Aqui a mensagem pode ser direta:
+     * quem chama e administrador do tenant e acabou de ver o usuario na listagem, entao nao
+     * ha informacao nova a proteger.
+     *
+     * @param array<string,string> $parametros
+     */
+    public function reenviarVerificacao(array $parametros): never
+    {
+        Guard::exigeAdministrador(true);
+
+        $usuario = $this->api->get("/api/users/{$parametros['uuid']}")->corpo();
+
+        $email = (string) ($usuario['email'] ?? '');
+
+        if ($email === '') {
+            $this->json([
+                'status' => 404,
+                'title'  => 'Usuario nao encontrado',
+                'detail' => 'Nao foi possivel localizar o usuario para reenviar o email.',
+            ], 404);
+        }
+
+        // Rota anonima na API, entao vai sem o Bearer -- mandar o token aqui nao teria
+        // efeito e so ampliaria o alcance de um vazamento de log.
+        $this->api->post('/api/auth/resend-verification', ['email' => $email], exigeToken: false);
+
+        $this->json([
+            'mensagem' => "Email de verificacao reenviado para {$email}.",
+        ], 202);
+    }
+
     /** @param array<string,string> $parametros */
     public function perfis(array $parametros): never
     {

@@ -38,12 +38,25 @@
         ? ''
         : ' <span class="badge-suave aviso" title="Ainda nao definiu a senha pelo link">pendente</span>';
 
+      /*
+       * So aparece para quem NUNCA verificou. Depois de verificada, a conta nao volta a
+       * esse estado -- nem pedir redefinicao de senha a desverifica --, entao o botao ali
+       * seria um controle que a API recusaria em silencio (o resend so enxerga contas
+       * pendentes).
+       */
+      var reenviar = u.verifiedAtUtc
+        ? ''
+        : '<button class="btn btn-sm btn-outline-secondary btn-reenviar" data-uuid="' +
+          App.escapar(u.uuid) + '" data-email="' + App.escapar(u.email) +
+          '" title="Reenviar email de verificacao"><i class="bi bi-envelope-arrow-up"></i></button> ';
+
       return [
         nome,
         App.escapar(u.email),
         papel,
         situacao + verificado,
         '<div class="text-end text-nowrap">' +
+          reenviar +
           '<button class="btn btn-sm btn-outline-secondary btn-perfis" data-uuid="' + App.escapar(u.uuid) +
             '" data-nome="' + nome + '" data-master="' + (u.master ? '1' : '') + '" title="Perfis">' +
             '<i class="bi bi-shield-lock"></i></button> ' +
@@ -112,6 +125,41 @@
   }
 
   $('#btn-novo').on('click', function () { abrirModal(null); });
+
+  $('#tabela-usuarios').on('click', '.btn-reenviar', function () {
+    var $botao = $(this);
+    var uuid = $botao.data('uuid');
+    var email = $botao.data('email');
+
+    Swal.fire({
+      title: 'Reenviar verificacao?',
+      html: 'Um novo link sera enviado para <strong>' + App.escapar(email) + '</strong>.' +
+            '<br><span class="small" style="color:var(--text-secondary)">' +
+            'O link anterior deixa de valer.</span>',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Reenviar',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true
+    }).then(function (r) {
+      if (!r.isConfirmed) { return; }
+
+      // App.ocupar troca o conteudo por "Aguarde...", que estica um botao de icone e
+      // desalinha a coluna inteira. Aqui basta trocar o icone e desabilitar.
+      var $icone = $botao.find('i');
+
+      $botao.prop('disabled', true);
+      $icone.attr('class', 'spinner-border spinner-border-sm');
+
+      App.post('/api/usuarios/' + uuid + '/reenviar-verificacao')
+        .done(function (resp) { App.alerta('ok', resp.mensagem); })
+        .fail(function (xhr) { App.tratarErro(xhr); })
+        .always(function () {
+          $botao.prop('disabled', false);
+          $icone.attr('class', 'bi bi-envelope-arrow-up');
+        });
+    });
+  });
 
   $('#tabela-usuarios').on('click', '.btn-editar', function () {
     abrirModal($(this).data('usuario'));
