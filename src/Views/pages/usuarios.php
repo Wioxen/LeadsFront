@@ -143,12 +143,14 @@ use App\View;
             <div class="modal-body">
                 <input type="hidden" id="perfis-uuid">
 
-                <div id="perfis-bloqueado" class="alert alert-info py-2 small d-none">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Este usuario e <strong>master</strong>: ele alcanca o sistema inteiro e nao
-                    recebe perfil. Retire a marca de master para vincular perfis.
-                </div>
-
+                <?php
+                /*
+                 * Nao ha aviso de master aqui: o botao que abre este modal nao aparece para
+                 * eles. Master e perfil sao excludentes, e a promocao exige que os perfis
+                 * ja tenham sido removidos -- entao um master sempre tem zero, e nao ha
+                 * conjunto a exibir.
+                 */
+                ?>
                 <div id="perfis-lista">
                     <div class="skeleton mb-2" style="height:2rem"></div>
                     <div class="skeleton" style="height:2rem"></div>

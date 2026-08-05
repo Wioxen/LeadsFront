@@ -50,6 +50,21 @@
           App.escapar(u.uuid) + '" data-email="' + App.escapar(u.email) +
           '" title="Reenviar email de verificacao"><i class="bi bi-envelope-arrow-up"></i></button> ';
 
+      /*
+       * Master nao tem perfil, e nao pode ter: a API recusa o vinculo com 409, porque as
+       * duas coisas sao excludentes. Como a promocao a master exige que os perfis ja
+       * tenham sido removidos, um master sempre tem zero -- nao ha conjunto a exibir nem a
+       * limpar.
+       *
+       * Antes o botao aparecia e o modal abria desabilitado, explicando. Era um caminho
+       * que so servia para dizer "nao": esconder e mais honesto do que oferecer e recusar.
+       */
+      var perfis = u.master
+        ? ''
+        : '<button class="btn btn-sm btn-outline-secondary btn-perfis" data-uuid="' + App.escapar(u.uuid) +
+          '" data-nome="' + nome + '" title="Perfis">' +
+          '<i class="bi bi-shield-lock"></i></button> ';
+
       return [
         nome,
         App.escapar(u.email),
@@ -57,9 +72,7 @@
         situacao + verificado,
         '<div class="text-end text-nowrap">' +
           reenviar +
-          '<button class="btn btn-sm btn-outline-secondary btn-perfis" data-uuid="' + App.escapar(u.uuid) +
-            '" data-nome="' + nome + '" data-master="' + (u.master ? '1' : '') + '" title="Perfis">' +
-            '<i class="bi bi-shield-lock"></i></button> ' +
+          perfis +
           '<button class="btn btn-sm btn-outline-secondary btn-editar" data-usuario=\'' +
             App.escapar(JSON.stringify(u)) + '\' title="Editar"><i class="bi bi-pencil"></i></button> ' +
           '<button class="btn btn-sm btn-outline-danger btn-excluir" data-uuid="' + App.escapar(u.uuid) +
@@ -272,16 +285,18 @@
 
   $('#tabela-usuarios').on('click', '.btn-perfis', function () {
     var uuid = $(this).data('uuid');
-    var ehMaster = !!$(this).data('master');
 
     $('#perfis-uuid').val(uuid);
     $('#perfis-usuario').text($(this).data('nome'));
 
-    // Master nao recebe perfil: a API responde 409. Desabilitar aqui evita o operador
-    // montar um conjunto inteiro para descobrir no envio que nao valia.
-    $('#perfis-bloqueado').toggleClass('d-none', !ehMaster);
-    $('#btn-salvar-perfis').prop('disabled', ehMaster);
-
+    /*
+     * Nao ha mais tratamento de master aqui: o botao nao existe para eles.
+     *
+     * Sobra uma janela estreita -- a linha da tabela pode estar velha se alguem promoveu
+     * o usuario a master em outra aba. Nesse caso o PUT volta 409 e o App.tratarErro
+     * mostra a mensagem da API, que ja explica o motivo. Preferivel a manter aqui um ramo
+     * que nunca roda e que o proximo leitor tomaria por caminho vivo.
+     */
     $('#perfis-lista').html('<div class="skeleton mb-2" style="height:2rem"></div>');
 
     modalPerfis.show();
@@ -304,8 +319,7 @@
           return '<div class="form-check py-1">' +
             '<input class="form-check-input" type="checkbox" value="' + p.id +
               '" id="perfil-' + p.id + '"' +
-              (vinculados.indexOf(p.id) >= 0 ? ' checked' : '') +
-              (ehMaster ? ' disabled' : '') + '>' +
+              (vinculados.indexOf(p.id) >= 0 ? ' checked' : '') + '>' +
             '<label class="form-check-label" for="perfil-' + p.id + '">' +
               App.escapar(p.name) +
               (inativo ? ' <span class="badge-suave neutro">inativo</span>' : '') +
