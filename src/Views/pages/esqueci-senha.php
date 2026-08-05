@@ -1,8 +1,12 @@
 <?php
 /*
- * A API responde 202 exista o email ou nao, e esta tela mostra a MESMA mensagem nos dois
- * casos. Uma mensagem diferente para email inexistente transformaria o formulario num
- * verificador de cadastro -- qualquer um descobriria quem tem conta na organizacao.
+ * A API DISTINGUE o email inexistente: 404 quando nao ha usuario, 403 quando a conta
+ * existe e ainda nao foi verificada. Foi decisao de produto, contra a pratica usual --
+ * ver o comentario em AuthService.ForgotPasswordAsync, na API.
+ *
+ * Consequencia para esta tela: o erro vem pronto da API e o App.tratarErro o exibe. O
+ * texto do 403 ja aponta para o reenvio de verificacao, entao nao ha ramificacao a fazer
+ * aqui.
  */
 ?>
 <div class="cartao-auth animate__animated animate__fadeIn">

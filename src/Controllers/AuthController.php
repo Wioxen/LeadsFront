@@ -96,9 +96,16 @@ final class AuthController extends Controller
     }
 
     /**
-     * Responde 202 exista o email ou nao, e a tela mostra a MESMA mensagem nos dois casos.
-     * Uma mensagem diferente para email inexistente transformaria esta tela num
-     * verificador de cadastro.
+     * A API passou a DISTINGUIR o email inexistente: 404 quando nao ha usuario, 403 quando
+     * a conta existe e ainda nao foi verificada, 202 quando o link foi enfileirado.
+     *
+     * Os dois erros sobem como ApiException e o Router os repassa ao navegador no formato
+     * ProblemDetails, entao nao ha nada a tratar aqui -- a tela mostra o detail que a API
+     * escreveu. O 403 leva o texto que aponta para o reenvio de verificacao.
+     *
+     * A mensagem de sucesso deixou de ser condicional: se chegou aqui, o email existe e o
+     * envio foi enfileirado. O "se houver uma conta" era a forma de nao confirmar o
+     * cadastro, e essa proteccao caiu por decisao de produto.
      */
     public function esqueciSenha(): never
     {
@@ -107,7 +114,7 @@ final class AuthController extends Controller
         ], exigeToken: false);
 
         $this->json([
-            'mensagem' => 'Se houver uma conta com esse email, o link foi enviado.',
+            'mensagem' => 'Link de redefinicao enviado. Verifique seu email.',
         ], 202);
     }
 
