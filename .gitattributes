@@ -1,0 +1,16 @@
+# Normaliza a quebra de linha no repositorio. Sem isto, o autocrlf do Windows produz diff
+# de arquivo inteiro quando alguem edita num editor com outra convencao -- e o diff e a
+# unidade de revisao deste projeto.
+* text=auto eol=lf
+
+# Binarios nao passam por conversao alguma.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.woff  binary
+*.woff2 binary
+*.ttf  binary
+*.eot  binary
+*.pdf  binary

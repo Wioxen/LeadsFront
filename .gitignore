@@ -1,0 +1,37 @@
+# Segredos. O .env carrega API_BASE_URL e as chaves de sessao -- nunca versionado.
+# O .env.example ao lado documenta as chaves, sempre com valor vazio.
+.env
+.env.*
+!.env.example
+
+# Bibliotecas de terceiros servidas localmente (bootstrap, jquery, apexcharts, ...).
+# Sao baixadas na instalacao; versiona-las incharia o repositorio com minificado que
+# ninguem revisa em diff.
+#
+# O .gitkeep fica de fora do ignore para que a pasta exista apos o clone -- sem ela, o
+# passo de instalacao falha em 'copiar para uma pasta que nao existe'.
+/public/assets/vendor/*
+!/public/assets/vendor/.gitkeep
+
+# A fonte Inter e binaria e entra pelo mesmo caminho do vendor.
+/public/assets/fonts/*
+!/public/assets/fonts/.gitkeep
+
+# Se algum dia entrar Composer, o diretorio dele acompanha o vendor acima.
+/vendor/
+composer.phar
+
+# Upload e cache gerados em execucao.
+/storage/
+/public/uploads/
+
+# Log local. Em producao o log vai para /api/loggers ou para o servidor, nao para arquivo.
+*.log
+
+# Editor e sistema operacional.
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
