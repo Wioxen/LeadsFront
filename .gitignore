@@ -4,18 +4,20 @@
 .env.*
 !.env.example
 
-# Bibliotecas de terceiros servidas localmente (bootstrap, jquery, apexcharts, ...).
-# Sao baixadas na instalacao; versiona-las incharia o repositorio com minificado que
-# ninguem revisa em diff.
+# As bibliotecas de terceiros e a fonte Inter SAO versionadas -- decisao revista.
 #
-# O .gitkeep fica de fora do ignore para que a pasta exista apos o clone -- sem ela, o
-# passo de instalacao falha em 'copiar para uma pasta que nao existe'.
-/public/assets/vendor/*
-!/public/assets/vendor/.gitkeep
-
-# A fonte Inter e binaria e entra pelo mesmo caminho do vendor.
-/public/assets/fonts/*
-!/public/assets/fonts/.gitkeep
+# A ideia original era baixa-las na instalacao, mantendo fora do diff um minificado que
+# ninguem revisa. Isso pressupoe um deploy onde da para rodar um script no servidor.
+#
+# O deploy real e Nixpacks, que constroi a imagem A PARTIR DO REPOSITORIO: o que nao esta
+# versionado nao existe no container. Com elas ignoradas, o CRM subia sem estilo algum e
+# /assets/vendor/jquery.min.js respondia 404 em producao.
+#
+# Versiona-las tambem torna a build reproduzivel e independente de rede: a mesma imagem sai
+# igual daqui a um ano, mesmo que um CDN mude ou saia do ar. O custo e ~1,5 MB de binario
+# que muda so quando alguem atualiza uma versao de proposito.
+#
+# tools/vendor.ps1 continua servindo para ATUALIZAR essas copias; o resultado e commitado.
 
 # Se algum dia entrar Composer, o diretorio dele acompanha o vendor acima.
 /vendor/
