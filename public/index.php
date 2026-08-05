@@ -51,20 +51,47 @@ spl_autoload_register(static function (string $classe) use ($raiz): void {
     }
 });
 
+/*
+ * FECHADO por padrao, ANTES de qualquer coisa que possa falhar.
+ *
+ * A ordem importa: ler a configuracao pode lancar, e se o display_errors so fosse
+ * desligado depois disso, uma falha de boot despejaria caminho absoluto e stack trace na
+ * tela -- com APP_DEBUG=false, sem que a variavel tivesse chance de valer. Foi exatamente
+ * o que aconteceu quando o .env nao existia no container.
+ */
+ini_set('display_errors', '0');
+error_reporting(E_ALL & ~E_DEPRECATED);
+
+// Arquivo OPCIONAL: em container a configuracao chega pelo ambiente, e nao ha .env algum.
 Config::carregar($raiz . '/.env');
 
 // Fuso de EXIBICAO. A API sempre fala UTC; a conversao acontece na borda, em View::data().
 date_default_timezone_set('America/Sao_Paulo');
 
+// So agora, e so se pedido, o erro volta para a tela.
 if (Config::debug()) {
     ini_set('display_errors', '1');
     error_reporting(E_ALL);
-} else {
-    // Em producao o stack trace nao vai para a tela. O traceId de um 5xx da API pode ir --
-    // e o que o suporte usa para correlacionar.
-    ini_set('display_errors', '0');
-    error_reporting(E_ALL & ~E_DEPRECATED);
 }
+
+/*
+ * Rede de seguranca para o que escapar depois daqui. Sem ela, um erro fatal em producao
+ * devolve pagina em branco -- e pagina em branco nao diz a ninguem o que fazer.
+ */
+set_exception_handler(static function (\Throwable $e): void {
+    error_log('[leads-front] ' . $e->getMessage() . ' em ' . $e->getFile() . ':' . $e->getLine());
+
+    if (!headers_sent()) {
+        http_response_code(500);
+        header('Content-Type: text/html; charset=utf-8');
+    }
+
+    echo Config::debug()
+        ? '<pre>' . htmlspecialchars((string) $e, ENT_QUOTES, 'UTF-8') . '</pre>'
+        : '<!doctype html><meta charset="utf-8"><title>Erro</title>'
+        . '<p style="font:16px system-ui;padding:2rem">Nao foi possivel processar a '
+        . 'requisicao. Se persistir, avise o suporte.</p>';
+});
 
 Session::iniciar();
 
