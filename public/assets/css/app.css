@@ -105,6 +105,33 @@ body.sidebar-recolhida .conteudo { margin-left: var(--sidebar-recolhida); }
   body.sidebar-recolhida .conteudo { margin-left: 0; }
 }
 
+/*
+ * Fundo escurecido enquanto a sidebar esta aberta no celular.
+ *
+ * Sem ele o menu abre por cima do conteudo sem nenhum sinal de que a pagina esta
+ * bloqueada, e a unica forma de fechar e achar de novo o botao que o abriu -- que fica
+ * atras do proprio menu. Tocar fora e o gesto que todo mundo tenta primeiro.
+ */
+.sidebar-fundo {
+  position: fixed;
+  inset: var(--navbar-altura) 0 0 0;
+  background: rgb(15 23 42 / .45);
+  z-index: 1019;              /* abaixo da sidebar (1020), acima do conteudo */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease-out;
+}
+
+.sidebar-fundo.visivel {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (min-width: 992px) {
+  /* No desktop a sidebar nao flutua sobre nada: o fundo nunca deve aparecer. */
+  .sidebar-fundo { display: none; }
+}
+
 /* --- Superficies -------------------------------------------------------------------- */
 
 .card {
@@ -285,6 +312,66 @@ body.sidebar-recolhida .conteudo { margin-left: var(--sidebar-recolhida); }
 .dataTables_wrapper .dataTables_info,
 .dataTables_wrapper .dataTables_length,
 .dataTables_wrapper .dataTables_filter { color: var(--text-secondary); font-size: .8125rem; }
+
+/* --- DataTables Responsive ----------------------------------------------------------- */
+
+/*
+ * O tema do plugin nao conhece os tokens, entao no escuro o expansor e a linha filha
+ * ficavam claros sobre fundo escuro. E o alvo de toque padrao e pequeno demais para um
+ * dedo: aumentado para 44px, que e o minimo recomendado.
+ */
+table.dataTable > tbody > tr > td.dtr-control::before {
+  background-color: var(--brand-primary) !important;
+  border-color: var(--brand-primary) !important;
+  box-shadow: none !important;
+}
+
+table.dataTable > tbody > tr > td.dtr-control {
+  padding-left: 2.5rem !important;
+  cursor: pointer;
+}
+
+table.dataTable > tbody > tr.child ul.dtr-details {
+  width: 100%;
+}
+
+table.dataTable > tbody > tr.child ul.dtr-details > li {
+  border-bottom: 1px solid var(--border);
+  padding: .5rem 0;
+}
+
+table.dataTable > tbody > tr.child span.dtr-title {
+  color: var(--text-secondary);
+  font-weight: 500;
+  min-width: 40%;
+}
+
+/* --- Acoes de linha ------------------------------------------------------------------ */
+
+/*
+ * A coluna de acoes sobrevive ao colapso (ver App.tabela), entao ela precisa CABER. Num
+ * telefone de 360px, tres botoes com padding padrao empurram a tabela para o scroll
+ * horizontal -- e o usuario nao encontra o que nao ve.
+ */
+.acoes-linha {
+  display: inline-flex;
+  gap: var(--space-1);
+  white-space: nowrap;
+}
+
+@media (max-width: 575.98px) {
+  .acoes-linha .btn {
+    --bs-btn-padding-x: .5rem;
+    --bs-btn-padding-y: .375rem;
+    min-width: 40px;          /* alvo de toque confortavel */
+  }
+
+  /* A busca e o seletor de quantidade ocupam a largura inteira em vez de disputar a linha. */
+  .dataTables_wrapper .dataTables_filter,
+  .dataTables_wrapper .dataTables_length { float: none; text-align: left; width: 100%; }
+  .dataTables_wrapper .dataTables_filter input { width: 100%; margin-left: 0; }
+  .dataTables_wrapper .dataTables_filter label { width: 100%; }
+}
 
 /* --- Autenticacao ------------------------------------------------------------------- */
 

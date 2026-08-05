@@ -70,7 +70,7 @@
         App.escapar(u.email),
         papel,
         situacao + verificado,
-        '<div class="text-end text-nowrap">' +
+        '<div class="acoes-linha">' +
           reenviar +
           perfis +
           '<button class="btn btn-sm btn-outline-secondary btn-editar" data-usuario=\'' +
@@ -81,19 +81,11 @@
       ];
     });
 
-    tabela = $('#tabela-usuarios').DataTable({
+    tabela = App.tabela($('#tabela-usuarios'), {
       data: linhas,
-      responsive: true,
-      pageLength: 25,
-      order: [],
       language: {
         emptyTable: 'Nenhum usuario cadastrado.',
-        zeroRecords: 'Nenhum usuario encontrado.',
-        info: 'Mostrando _START_ a _END_ de _TOTAL_',
-        infoEmpty: 'Nenhum registro',
-        lengthMenu: '_MENU_ por pagina',
-        search: 'Buscar:',
-        paginate: { first: 'Primeira', last: 'Ultima', next: 'Proxima', previous: 'Anterior' }
+        zeroRecords: 'Nenhum usuario encontrado.'
       }
     });
   }

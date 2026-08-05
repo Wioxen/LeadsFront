@@ -41,6 +41,11 @@ $arquivos = @(
     @{ destino = 'datatables\dataTables.bootstrap5.min.css';      url = 'https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css' }
     @{ destino = 'datatables\dataTables.responsive.min.js';       url = 'https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js' }
 
+    # O CSS do Responsive NAO e opcional. Sem ele o plugin esconde as colunas que nao cabem
+    # -- comecando pela ultima, que e a de acoes -- e o controle que as reabre fica sem
+    # estilo algum: invisivel, sem area de clique. No celular os botoes simplesmente somem.
+    @{ destino = 'datatables\responsive.bootstrap5.min.css';      url = 'https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css' }
+
     @{ destino = 'select2\select2.min.js';                        url = 'https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js' }
     @{ destino = 'select2\select2-bootstrap-5.min.css';           url = 'https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css' }
 

@@ -207,6 +207,57 @@ window.App = (function ($) {
     return dados;
   }
 
+  /* --- Tabelas ----------------------------------------------------------------------- */
+
+  /**
+   * Inicializa um DataTable com os padroes do projeto.
+   *
+   * Existe para que a proxima tabela nao nasca sem o responsivePriority. Sem ele, o plugin
+   * esconde as colunas da direita para a esquerda, e a de ACOES -- que e sempre a ultima --
+   * e a primeira a sair. No celular o usuario ficava vendo a listagem sem conseguir editar
+   * nem excluir nada.
+   *
+   * A prioridade e INVERTIDA: numero MENOR e mantido por mais tempo. A coluna 0 (o que
+   * identifica a linha) e a ultima (as acoes) sobrevivem; email, data e categoria colapsam
+   * para dentro do expansor, que e onde informacao de apoio deve ficar num telefone.
+   */
+  function tabela($elemento, opcoes) {
+    opcoes = opcoes || {};
+
+    var padrao = {
+      responsive: true,
+      pageLength: 25,
+
+      // A API ja devolve na ordem certa; qualquer ordenacao padrao do DataTables a desfaz.
+      order: [],
+
+      columnDefs: [
+        { responsivePriority: 1, targets: 0 },
+        { responsivePriority: 2, targets: -1 }
+      ],
+
+      language: {
+        emptyTable: 'Nenhum registro encontrado.',
+        zeroRecords: 'Nenhum registro para essa busca.',
+        info: 'Mostrando _START_ a _END_ de _TOTAL_',
+        infoEmpty: 'Nenhum registro',
+        infoFiltered: '(de _MAX_ no total)',
+        lengthMenu: '_MENU_ por pagina',
+        search: 'Buscar:',
+        paginate: { first: 'Primeira', last: 'Ultima', next: 'Proxima', previous: 'Anterior' }
+      }
+    };
+
+    var config = $.extend({}, padrao, opcoes);
+
+    // Extend RASO de proposito: um columnDefs informado substitui o padrao inteiro, em vez
+    // de se fundir por indice -- que e como $.extend(true, ...) trata arrays, produzindo
+    // combinacoes que ninguem escreveu.
+    config.language = $.extend({}, padrao.language, opcoes.language || {});
+
+    return $elemento.DataTable(config);
+  }
+
   /* --- Formatacao -------------------------------------------------------------------- */
 
   function escapar(texto) {
@@ -262,15 +313,41 @@ window.App = (function ($) {
       $corpo.addClass('sidebar-recolhida');
     }
 
+    // O fundo e criado uma vez e reaproveitado. Vive fora da sidebar de proposito: dentro
+    // dela, herdaria o transform e o clique cairia na area errada.
+    var $fundo = $('<div class="sidebar-fundo"></div>').appendTo('body');
+
+    function alternarNoCelular(abrir) {
+      $('.sidebar').toggleClass('aberta', abrir);
+      $fundo.toggleClass('visivel', abrir);
+    }
+
     $('#btn-sidebar').on('click', function () {
       if (window.matchMedia('(max-width: 991.98px)').matches) {
-        $('.sidebar').toggleClass('aberta');
+        alternarNoCelular(!$('.sidebar').hasClass('aberta'));
         return;
       }
 
       $corpo.toggleClass('sidebar-recolhida');
       localStorage.setItem('crm-sidebar',
         $corpo.hasClass('sidebar-recolhida') ? 'recolhida' : 'aberta');
+    });
+
+    // Tocar fora fecha -- e o primeiro gesto que todo mundo tenta.
+    $fundo.on('click', function () { alternarNoCelular(false); });
+
+    // Esc fecha, para quem estiver num tablet com teclado.
+    $(document).on('keydown', function (e) {
+      if (e.key === 'Escape') { alternarNoCelular(false); }
+    });
+
+    /*
+     * Ao passar para o desktop, desfaz o estado de celular. Sem isto, girar o aparelho ou
+     * redimensionar a janela com o menu aberto deixa o fundo escuro preso na tela, cobrindo
+     * um conteudo que ja nao esta bloqueado.
+     */
+    window.matchMedia('(min-width: 992px)').addEventListener('change', function (e) {
+      if (e.matches) { alternarNoCelular(false); }
     });
 
     if (window.AOS) {
@@ -290,6 +367,7 @@ window.App = (function ($) {
     post: function (url, dados) { return requisitar('POST', url, dados); },
     put: function (url, dados) { return requisitar('PUT', url, dados); },
     del: function (url) { return requisitar('DELETE', url); },
+    tabela: tabela,
     problema: problema,
     tratarErro: tratarErro,
     limparErros: limparErros,

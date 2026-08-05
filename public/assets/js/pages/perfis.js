@@ -24,7 +24,7 @@
       $('#tabela-perfis tbody').empty();
     }
 
-    tabela = $('#tabela-perfis').DataTable({
+    tabela = App.tabela($('#tabela-perfis'), {
       data: dados.map(function (p) {
         var sistema = p.isSystem
           ? ' <span class="badge-suave info" title="Criado pela aplicacao">sistema</span>'
@@ -46,24 +46,14 @@
           p.status === 1
             ? '<span class="badge-suave ok">Ativo</span>'
             : '<span class="badge-suave neutro">Inativo</span>',
-          '<div class="text-end text-nowrap">' +
+          '<div class="acoes-linha">' +
             '<button class="btn btn-sm btn-outline-secondary btn-editar" data-uuid="' +
               App.escapar(p.uuid) + '" title="Editar"><i class="bi bi-pencil"></i></button> ' +
             excluir +
           '</div>'
         ];
       }),
-      responsive: true,
-      pageLength: 25,
-      order: [],
-      language: {
-        emptyTable: 'Nenhum perfil cadastrado.',
-        info: 'Mostrando _START_ a _END_ de _TOTAL_',
-        infoEmpty: 'Nenhum registro',
-        lengthMenu: '_MENU_ por pagina',
-        search: 'Buscar:',
-        paginate: { first: 'Primeira', last: 'Ultima', next: 'Proxima', previous: 'Anterior' }
-      }
+      language: { emptyTable: 'Nenhum perfil cadastrado.' }
     });
   }
 

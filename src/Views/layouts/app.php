@@ -32,6 +32,9 @@ use App\View;
 <link rel="stylesheet" href="/assets/vendor/bootstrap/bootstrap.min.css">
 <link rel="stylesheet" href="/assets/vendor/bootstrap-icons/bootstrap-icons.css">
 <link rel="stylesheet" href="/assets/vendor/datatables/dataTables.bootstrap5.min.css">
+<!-- Sem este CSS o controle que reabre as colunas escondidas fica invisivel, e no celular
+     as acoes do CRUD somem sem deixar caminho de volta. -->
+<link rel="stylesheet" href="/assets/vendor/datatables/responsive.bootstrap5.min.css">
 <link rel="stylesheet" href="/assets/vendor/select2/select2-bootstrap-5.min.css">
 <link rel="stylesheet" href="/assets/vendor/flatpickr/flatpickr.min.css">
 <link rel="stylesheet" href="/assets/vendor/toastify/toastify.min.css">

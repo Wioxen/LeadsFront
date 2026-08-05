@@ -27,7 +27,7 @@
       $('#tabela-logs tbody').empty();
     }
 
-    tabela = $('#tabela-logs').DataTable({
+    tabela = App.tabela($('#tabela-logs'), {
       data: dados.map(function (e) {
         var nivel = NIVEIS[e.severity] || { rotulo: String(e.severity), classe: 'neutro' };
 
@@ -51,17 +51,18 @@
             App.relativo(e.createdAtUtc) + '</span>'
         ];
       }),
-      responsive: true,
-      pageLength: 25,
-      order: [],           // a API ja devolve os mais recentes primeiro
+      /*
+       * Esta tabela nao tem coluna de acoes -- o log e so leitura. O padrao protegeria a
+       * ultima coluna, que aqui e a data; num telefone o que importa e o NIVEL e a
+       * MENSAGEM. Categoria e data colapsam para dentro do expansor.
+       */
+      columnDefs: [
+        { responsivePriority: 1, targets: 0 },
+        { responsivePriority: 2, targets: 2 }
+      ],
       language: {
         emptyTable: 'Nenhum evento registrado nesta organizacao.',
-        zeroRecords: 'Nenhum evento encontrado.',
-        info: 'Mostrando _START_ a _END_ de _TOTAL_',
-        infoEmpty: 'Nenhum registro',
-        lengthMenu: '_MENU_ por pagina',
-        search: 'Buscar:',
-        paginate: { first: 'Primeira', last: 'Ultima', next: 'Proxima', previous: 'Anterior' }
+        zeroRecords: 'Nenhum evento encontrado.'
       }
     });
   }

@@ -26,7 +26,7 @@
         App.escapar(l.email),
         '<span title="' + App.escapar(App.dataLocal(l.createdAtUtc)) + '">' +
           App.relativo(l.createdAtUtc) + '</span>',
-        '<div class="text-end text-nowrap">' +
+        '<div class="acoes-linha">' +
           '<button class="btn btn-sm btn-outline-secondary btn-editar" ' +
             'data-uuid="' + App.escapar(l.uuid) + '" ' +
             'data-name="' + App.escapar(l.name) + '" ' +
@@ -40,31 +40,18 @@
       ];
     });
 
-    tabela = $('#tabela-leads').DataTable({
+    /*
+     * Paginacao de EXIBICAO, sobre a lista inteira que ja veio. Nao e serverSide, e nao
+     * deve virar: apontar serverSide para um endpoint que ignora start/length produziria
+     * uma tela identica e uma mentira que so aparece no dia em que alguem confiar nela.
+     *
+     * App.tabela cuida do responsivePriority -- sem ele a coluna de acoes some no celular.
+     */
+    tabela = App.tabela($('#tabela-leads'), {
       data: linhas,
-      responsive: true,
-      pageLength: 25,
-
-      /*
-       * A API ja devolve do mais recente para o mais antigo -- qualquer ordenacao padrao
-       * do DataTables desfaria a ordem que ela escolheu.
-       */
-      order: [],
-
-      /*
-       * Paginacao de EXIBICAO, sobre a lista inteira que ja veio. Nao e serverSide, e nao
-       * deve virar: apontar serverSide para um endpoint que ignora start/length produziria
-       * uma tela identica e uma mentira que so aparece no dia em que alguem confiar nela.
-       */
       language: {
         emptyTable: 'Nenhum lead cadastrado ainda.',
-        zeroRecords: 'Nenhum lead encontrado para essa busca.',
-        info: 'Mostrando _START_ a _END_ de _TOTAL_',
-        infoEmpty: 'Nenhum registro',
-        infoFiltered: '(de _MAX_ no total)',
-        lengthMenu: '_MENU_ por pagina',
-        search: 'Buscar:',
-        paginate: { first: 'Primeira', last: 'Ultima', next: 'Proxima', previous: 'Anterior' }
+        zeroRecords: 'Nenhum lead encontrado para essa busca.'
       }
     });
   }

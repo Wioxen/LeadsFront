@@ -31,7 +31,7 @@
       $('#tabela-permissoes tbody').empty();
     }
 
-    tabela = $('#tabela-permissoes').DataTable({
+    tabela = App.tabela($('#tabela-permissoes'), {
       data: dados.map(function (p) {
         var situacao = !p.isActive
           // Inativa = a action saiu do codigo. Nao concede nada, e concede-la da 404.
@@ -45,22 +45,12 @@
           App.escapar(p.actionDescription || p.action),
           '<code class="small">' + App.escapar(p.controller + '.' + p.action) + '</code>',
           situacao,
-          '<div class="text-end"><button class="btn btn-sm btn-outline-secondary btn-editar" ' +
+          '<div class="acoes-linha"><button class="btn btn-sm btn-outline-secondary btn-editar" ' +
             'data-permissao=\'' + App.escapar(JSON.stringify(p)) + '\' title="Editar rotulos">' +
             '<i class="bi bi-pencil"></i></button></div>'
         ];
       }),
-      responsive: true,
-      pageLength: 25,
-      order: [],
-      language: {
-        emptyTable: 'Nenhuma permissao no catalogo.',
-        info: 'Mostrando _START_ a _END_ de _TOTAL_',
-        infoEmpty: 'Nenhum registro',
-        lengthMenu: '_MENU_ por pagina',
-        search: 'Buscar:',
-        paginate: { first: 'Primeira', last: 'Ultima', next: 'Proxima', previous: 'Anterior' }
-      }
+      language: { emptyTable: 'Nenhuma permissao no catalogo.' }
     });
   }
 
