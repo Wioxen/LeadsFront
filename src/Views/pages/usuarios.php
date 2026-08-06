@@ -49,6 +49,46 @@ use App\View;
                 <div class="modal-body">
                     <input type="hidden" name="uuid">
 
+                    <?php
+                    /*
+                     * A foto NAO faz parte do payload do cadastro: ela tem endpoint proprio,
+                     * que grava o arquivo e aponta o registro no mesmo passo. Aqui ela e
+                     * apenas escolhida; o envio acontece depois de salvar, quando ja existe
+                     * um uuid para receber o arquivo (num cadastro novo ele so nasce ali).
+                     *
+                     * O 'name' do input fica de fora de proposito: App.dadosDoFormulario
+                     * varre por [name], e um campo de arquivo entraria no JSON como o texto
+                     * "C:\fakepath\foto.jpg", que e o que o navegador expoe.
+                     */
+                    ?>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <img id="u-foto-previa" alt="" width="64" height="64"
+                             class="rounded-circle border d-none"
+                             style="object-fit:cover;background:var(--surface-muted)">
+                        <span id="u-foto-vazia"
+                              class="rounded-circle border d-inline-flex align-items-center justify-content-center"
+                              style="width:64px;height:64px;background:var(--surface-muted);color:var(--text-secondary)">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+
+                        <div class="d-flex flex-column gap-1">
+                            <div class="d-flex gap-2">
+                                <label class="btn btn-outline-secondary btn-sm mb-0" for="u-foto">
+                                    <i class="fa-solid fa-image me-1"></i>Escolher foto
+                                </label>
+                                <button type="button" class="btn btn-outline-danger btn-sm d-none" id="btn-remover-foto">
+                                    <i class="fa-solid fa-trash-can me-1"></i>Remover
+                                </button>
+                            </div>
+                            <span class="small" style="color:var(--text-secondary)">
+                                JPEG, PNG, GIF ou WebP, ate 2 MB.
+                            </span>
+                        </div>
+
+                        <input type="file" id="u-foto" class="d-none"
+                               accept="image/jpeg,image/png,image/gif,image/webp">
+                    </div>
+
                     <div class="row g-3">
                         <div class="col-6">
                             <label class="form-label" for="u-firstName">Nome</label>

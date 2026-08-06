@@ -147,6 +147,12 @@ $router->get('/api/usuarios/{uuid}/perfis', [UsersController::class, 'perfis']);
 $router->put('/api/usuarios/{uuid}/perfis', [UsersController::class, 'substituirPerfis']);
 $router->post('/api/usuarios/{uuid}/reenviar-verificacao', [UsersController::class, 'reenviarVerificacao']);
 
+// A foto passa pelo BFF como o resto: o navegador nunca fala com a API. O GET responde
+// imagem, e nao JSON, para poder ser o src de um <img>.
+$router->post('/api/usuarios/{uuid}/foto', [UsersController::class, 'enviarFoto']);
+$router->get('/api/usuarios/{uuid}/foto', [UsersController::class, 'foto']);
+$router->delete('/api/usuarios/{uuid}/foto', [UsersController::class, 'removerFoto']);
+
 $router->get('/perfis', [ProfilesController::class, 'index']);
 $router->get('/api/perfis', [ProfilesController::class, 'listar']);
 $router->get('/api/perfis/{uuid}', [ProfilesController::class, 'obter']);

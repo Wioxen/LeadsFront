@@ -139,6 +139,166 @@ final class ApiClient
         return new ApiResponse($status, $decodificado);
     }
 
+    /**
+     * Repassa um arquivo recebido pelo navegador, em `multipart/form-data`.
+     *
+     * O conteudo NAO passa pela memoria do PHP: o cURL le direto do arquivo temporario que
+     * o upload gerou. Uma foto de 2 MB nunca vira uma string de 2 MB aqui.
+     *
+     * O nome e o tipo declarados sao repassados como chegaram, e nao "sanitizados" no
+     * caminho -- quem decide o nome de gravacao e o tipo real e a API, pelo conteudo. Limpar
+     * aqui daria a impressao de que o valor passou a ser confiavel.
+     *
+     * @param array{tmp_name:string,name:string,type:string} $arquivo entrada de $_FILES
+     *
+     * @throws ApiException
+     * @throws SessionExpiredException
+     */
+    public function enviarArquivo(string $caminho, string $campo, array $arquivo): ApiResponse
+    {
+        $token = Session::token();
+
+        if ($token === null || $token === '') {
+            Session::encerrar();
+
+            throw new SessionExpiredException();
+        }
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL            => $this->baseUrl . '/' . ltrim($caminho, '/'),
+            CURLOPT_POST           => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => $this->timeout,
+            CURLOPT_CONNECTTIMEOUT => min(5, $this->timeout),
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+
+            // Sem 'Content-Type' na mao: o cURL monta o cabecalho com o BOUNDARY que ele
+            // mesmo sorteou. Escrever 'multipart/form-data' aqui sobrescreveria isso e o
+            // corpo chegaria ilegivel na API.
+            CURLOPT_HTTPHEADER => ['Accept: application/json', 'Authorization: Bearer ' . $token],
+
+            CURLOPT_POSTFIELDS => [
+                $campo => new \CURLFile(
+                    $arquivo['tmp_name'],
+                    $arquivo['type'] ?: 'application/octet-stream',
+                    $arquivo['name'] ?: 'arquivo',
+                ),
+            ],
+        ]);
+
+        return $this->concluir($curl);
+    }
+
+    /**
+     * Busca um binario da API -- imagem, no caso -- devolvendo conteudo e tipo.
+     *
+     * Nao devolve `ApiResponse` porque o corpo nao e JSON. Erros, esses sim, continuam
+     * chegando como ProblemDetails e sobem como `ApiException`.
+     *
+     * @return array{conteudo:string,tipo:string}
+     *
+     * @throws ApiException
+     * @throws SessionExpiredException
+     */
+    public function baixar(string $caminho): array
+    {
+        $token = Session::token();
+
+        if ($token === null || $token === '') {
+            Session::encerrar();
+
+            throw new SessionExpiredException();
+        }
+
+        $curl = curl_init();
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL            => $this->baseUrl . '/' . ltrim($caminho, '/'),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => $this->timeout,
+            CURLOPT_CONNECTTIMEOUT => min(5, $this->timeout),
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_HTTPHEADER     => ['Authorization: Bearer ' . $token],
+        ]);
+
+        $bruto = curl_exec($curl);
+        $status = (int) curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
+        $tipo = (string) curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
+        $erroCurl = curl_error($curl);
+
+        curl_close($curl);
+
+        if ($bruto === false) {
+            throw new ApiException(
+                504,
+                'A API nao respondeu',
+                Config::debug()
+                    ? "Falha de rede ao baixar {$caminho}: {$erroCurl}"
+                    : 'Nao foi possivel falar com o servidor. Tente novamente em instantes.',
+            );
+        }
+
+        if ($status >= 400) {
+            $decodificado = json_decode((string) $bruto, true);
+
+            throw ApiException::daResposta(
+                $status,
+                is_array($decodificado) ? $decodificado : null,
+                (string) $bruto,
+            );
+        }
+
+        return [
+            'conteudo' => (string) $bruto,
+
+            // Tipo vindo da API, nao adivinhado do nome. Se ela nao disser, o navegador
+            // que decida -- e melhor que afirmar um tipo errado.
+            'tipo' => $tipo !== '' ? $tipo : 'application/octet-stream',
+        ];
+    }
+
+    /**
+     * Fecha a chamada e traduz a resposta, no mesmo contrato de `requisitar`.
+     *
+     * @param \CurlHandle $curl
+     */
+    private function concluir($curl): ApiResponse
+    {
+        $bruto = curl_exec($curl);
+        $status = (int) curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
+        $erroCurl = curl_error($curl);
+
+        curl_close($curl);
+
+        if ($bruto === false) {
+            throw new ApiException(
+                504,
+                'A API nao respondeu',
+                Config::debug()
+                    ? "Falha de rede: {$erroCurl}"
+                    : 'Nao foi possivel falar com o servidor. Tente novamente em instantes.',
+            );
+        }
+
+        $decodificado = $bruto === '' ? null : json_decode((string) $bruto, true);
+
+        if (!is_array($decodificado)) {
+            $decodificado = null;
+        }
+
+        if ($status >= 400) {
+            throw ApiException::daResposta($status, $decodificado, (string) $bruto);
+        }
+
+        return new ApiResponse($status, $decodificado);
+    }
+
     /** @param array<string,string> $query */
     public function get(string $caminho, array $query = [], bool $exigeToken = true): ApiResponse
     {

@@ -70,8 +70,16 @@
           '" data-nome="' + nome + '" title="Perfis">' +
           '<i class="fa-solid fa-user-shield"></i></button> ';
 
+      // Miniatura so quando ha foto: um <img> sem src pisca o icone de imagem quebrada.
+      var avatar = u.photo
+        ? '<img src="/api/usuarios/' + App.escapar(u.uuid) + '/foto" alt="" width="28" height="28" ' +
+          'class="rounded-circle me-2 border" style="object-fit:cover;vertical-align:middle">'
+        : '<span class="rounded-circle me-2 border d-inline-flex align-items-center justify-content-center" ' +
+          'style="width:28px;height:28px;vertical-align:middle;background:var(--surface-muted);' +
+          'color:var(--text-secondary);font-size:.7rem"><i class="fa-solid fa-user"></i></span>';
+
       return [
-        nome,
+        avatar + nome,
         App.escapar(u.email),
         papel,
         situacao + verificado,
@@ -107,6 +115,96 @@
       });
   }
 
+  /* --- Foto ------------------------------------------------------------------------- */
+
+  // Arquivo escolhido nesta abertura do modal, ainda nao enviado. Nulo quando nao houve
+  // escolha -- e nesse caso a foto atual permanece como esta.
+  var fotoEscolhida = null;
+
+  // URL do preview local, criada por createObjectURL. Precisa ser revogada: cada chamada
+  // prende o arquivo na memoria do navegador ate a aba fechar.
+  var previaLocal = null;
+
+  function mostrarFoto(src) {
+    if (previaLocal) { URL.revokeObjectURL(previaLocal); previaLocal = null; }
+
+    if (src) {
+      $('#u-foto-previa').attr('src', src).removeClass('d-none');
+      $('#u-foto-vazia').addClass('d-none');
+      $('#btn-remover-foto').removeClass('d-none');
+    } else {
+      $('#u-foto-previa').removeAttr('src').addClass('d-none');
+      $('#u-foto-vazia').removeClass('d-none');
+      $('#btn-remover-foto').addClass('d-none');
+    }
+  }
+
+  $('#u-foto').on('change', function () {
+    var arquivo = this.files && this.files[0];
+
+    if (!arquivo) { return; }
+
+    fotoEscolhida = arquivo;
+    previaLocal = URL.createObjectURL(arquivo);
+
+    // Preview do arquivo local, antes de qualquer envio. A conferencia de verdade -- se e
+    // mesmo uma imagem -- e da API, pelos primeiros bytes; aqui e so o que a pessoa ve.
+    mostrarFoto(previaLocal);
+  });
+
+  $('#btn-remover-foto').on('click', function () {
+    var uuid = $('[name="uuid"]', $('#form-usuario')).val();
+
+    // Nunca chegou a existir no servidor: basta desfazer a escolha.
+    if (!uuid || fotoEscolhida) {
+      fotoEscolhida = null;
+      $('#u-foto').val('');
+      mostrarFoto(null);
+
+      return;
+    }
+
+    var $botao = $(this);
+
+    App.ocupar($botao, true);
+
+    App.del('/api/usuarios/' + uuid + '/foto')
+      .done(function () {
+        mostrarFoto(null);
+        $('#u-foto').val('');
+        App.alerta('ok', 'Foto removida.');
+        carregar();
+      })
+      .fail(function (xhr) { App.tratarErro(xhr); })
+      .always(function () { App.ocupar($botao, false); });
+  });
+
+  /**
+   * Envia a foto escolhida, se houver. Roda DEPOIS de salvar o cadastro: num usuario novo o
+   * uuid so existe a partir dali.
+   */
+  function enviarFoto(uuid) {
+    if (!fotoEscolhida) { return $.Deferred().resolve().promise(); }
+
+    var dados = new FormData();
+
+    dados.append('file', fotoEscolhida);
+
+    return $.ajax({
+      url: '/api/usuarios/' + uuid + '/foto',
+      method: 'POST',
+      data: dados,
+
+      // As duas linhas abaixo sao obrigatorias com FormData: sem elas o jQuery serializa o
+      // objeto como texto e define um Content-Type sem o boundary, e o arquivo nao chega.
+      processData: false,
+      contentType: false,
+
+      // App.token() le variavel CSS, nao o CSRF. O token do formulario esta na meta.
+      headers: { 'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content') || '' }
+    });
+  }
+
   /* --- Formulario -------------------------------------------------------------------- */
 
   function abrirModal(u) {
@@ -115,6 +213,13 @@
     App.limparErros($form);
     $form[0].reset();
     $('#aviso-master').addClass('d-none');
+
+    fotoEscolhida = null;
+    $('#u-foto').val('');
+
+    // Com uuid na URL, o navegador busca a imagem pelo BFF. O parametro de tempo evita que
+    // ele reaproveite a foto anterior do cache logo depois de uma troca.
+    mostrarFoto(u && u.photo ? '/api/usuarios/' + u.uuid + '/foto?t=' + Date.now() : null);
 
     $('[name="uuid"]', $form).val(u ? u.uuid : '');
 
@@ -258,7 +363,27 @@
 
     App.ocupar($botao, true);
 
+    /*
+     * Salvar e enviar a foto sao DOIS passos, nesta ordem, e nao ha como uni-los: num
+     * cadastro novo o uuid so nasce na resposta do POST, e sem uuid nao ha para onde mandar
+     * o arquivo.
+     *
+     * Se a foto falhar depois de o cadastro ter sido salvo, o cadastro CONTINUA salvo -- e
+     * o aviso diz exatamente isso. Desfazer o cadastro por causa da foto seria pior: o
+     * trabalho de preencher o formulario se perderia por causa do acessorio.
+     */
     (uuid ? App.put('/api/usuarios/' + uuid, dados) : App.post('/api/usuarios', dados))
+      .then(function (r) {
+        var alvo = uuid || (r && r.uuid);
+
+        if (!alvo || !fotoEscolhida) { return; }
+
+        return enviarFoto(alvo).fail(function (xhr) {
+          var p = App.problema(xhr);
+
+          App.alerta('erro', 'Cadastro salvo, mas a foto nao subiu: ' + (p.detail || p.title));
+        });
+      })
       .done(function () {
         modalUsuario.hide();
         App.alerta('ok', uuid
