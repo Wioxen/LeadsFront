@@ -161,7 +161,7 @@
         .fail(function (xhr) { App.tratarErro(xhr); })
         .always(function () {
           $botao.prop('disabled', false);
-          $icone.attr('class', 'bi fa-paper-plane');
+          $icone.attr('class', 'fa-solid fa-paper-plane');
         });
     });
   });

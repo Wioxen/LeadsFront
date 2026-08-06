@@ -316,19 +316,50 @@ body.sidebar-recolhida .conteudo { margin-left: var(--sidebar-recolhida); }
 /* --- DataTables Responsive ----------------------------------------------------------- */
 
 /*
- * O tema do plugin nao conhece os tokens, entao no escuro o expansor e a linha filha
- * ficavam claros sobre fundo escuro. E o alvo de toque padrao e pequeno demais para um
- * dedo: aumentado para 44px, que e o minimo recomendado.
+ * O expansor padrao do plugin e um circulo VERDE com "+", que vira VERMELHO com "-" quando
+ * aberto. Verde e vermelho, nesta interface, significam sucesso e erro -- usa-los para
+ * "tem mais conteudo" e "esta aberto" ensina o olho a ler cor de estado onde nao ha estado
+ * algum. Trocado por uma seta que gira, que e o gesto que a propria acao descreve.
+ *
+ * Redesenhado com o glifo do Font Awesome em vez de imagem: acompanha a cor do tema
+ * sozinho, escala com o zoom e nao pesa um arquivo a mais.
  */
 table.dataTable > tbody > tr > td.dtr-control::before {
-  background-color: var(--brand-primary) !important;
-  border-color: var(--brand-primary) !important;
+  content: "\f105";                    /* fa-chevron-right */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+
+  /* Anula o desenho do plugin: fundo, borda, sombra e o "+" que ele injeta. */
+  background: color-mix(in srgb, var(--brand-primary) 12%, transparent) !important;
+  border: none !important;
   box-shadow: none !important;
+  color: var(--brand-primary);
+
+  display: inline-grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: var(--radius-sm) !important;
+  font-size: .8125rem;
+  line-height: 1;
+  transition: transform .15s ease-out, background-color .15s ease-out;
+}
+
+/* Aberta: a seta aponta para baixo, indicando que o conteudo desceu. */
+table.dataTable > tbody > tr.parent > td.dtr-control::before {
+  transform: rotate(90deg);
+  background: var(--brand-primary) !important;
+  color: #fff;
 }
 
 table.dataTable > tbody > tr > td.dtr-control {
-  padding-left: 2.5rem !important;
+  /* Alvo de toque confortavel: 44px e o minimo recomendado para o dedo. */
+  padding-left: 2.75rem !important;
   cursor: pointer;
+}
+
+table.dataTable > tbody > tr > td.dtr-control:hover::before {
+  background: color-mix(in srgb, var(--brand-primary) 22%, transparent) !important;
 }
 
 table.dataTable > tbody > tr.child ul.dtr-details {
