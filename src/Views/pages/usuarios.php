@@ -80,8 +80,17 @@ use App\View;
                                     <i class="fa-solid fa-trash-can me-1"></i>Remover
                                 </button>
                             </div>
+                            <?php
+                            /*
+                             * Avisar da conversao evita o chamado "por que minha imagem
+                             * mudou?". Ela e convertida para JPEG e reduzida, entao fundo
+                             * transparente vira branco e GIF animado para no primeiro
+                             * quadro -- coisas que o usuario nota e nao teria como adivinhar.
+                             */
+                            ?>
                             <span class="small" style="color:var(--text-secondary)">
-                                JPEG, PNG, GIF ou WebP, ate 2 MB.
+                                JPEG, PNG, GIF ou WebP, ate 2 MB. A imagem e convertida para
+                                JPEG e reduzida a 512px; fundo transparente fica branco.
                             </span>
                         </div>
 
