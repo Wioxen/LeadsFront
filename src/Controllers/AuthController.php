@@ -12,8 +12,11 @@ use App\Http\Respond;
 /**
  * Login e os fluxos de conta conduzidos pelo proprio dono.
  *
- * Nao existe cadastro publico: usuario nasce por convite de um Admin ou master. Tambem
- * nao existe troca de senha autenticado -- o caminho e sempre forgot-password.
+ * Nao existe cadastro publico: usuario nasce por convite de um Admin ou master.
+ *
+ * Sao TRES os caminhos para definir senha, e cada um prova uma coisa diferente:
+ * verify-account e reset-password provam posse do ENDERECO, por link de email, e sao
+ * anonimos; change-password prova posse da SENHA ATUAL, e e o unico autenticado.
  */
 final class AuthController extends Controller
 {
@@ -177,6 +180,30 @@ final class AuthController extends Controller
         Session::descartarDesafio();
 
         Respond::redirecionar('/login');
+    }
+
+    /**
+     * Troca de senha do proprio usuario, ja autenticado.
+     *
+     * O BFF nao decide nada aqui: repassa os tres campos e deixa a API conferir a senha
+     * atual. Validar forca ou conferencia deste lado duplicaria a regra e criaria a chance
+     * de as duas divergirem -- e a que vale seria sempre a de la.
+     *
+     * NAO envia identificador de usuario: a API resolve o alvo pelo token. Mandar um daqui
+     * seria oferecer a ela a chance de trocar a senha de outra pessoa.
+     */
+    public function trocarSenha(): never
+    {
+        Guard::exigeLogin(true);
+
+        $this->api->post('/api/auth/change-password', [
+            'senhaAtual'       => $this->campo('senhaAtual'),
+            'novaSenha'        => $this->campo('novaSenha'),
+            'confirmacaoSenha' => $this->campo('confirmacaoSenha'),
+        ]);
+
+        // A API responde 204. O corpo aqui existe so para a tela ter o que exibir.
+        $this->json(['mensagem' => 'Senha alterada com sucesso.']);
     }
 
     public function logout(): never

@@ -62,6 +62,13 @@ use App\View;
                 </li>
                 <li><hr class="dropdown-divider"></li>
                 <li>
+                    <button type="button" class="dropdown-item" data-bs-toggle="modal"
+                            data-bs-target="#modal-senha">
+                        <i class="fa-solid fa-key me-2"></i>Trocar senha
+                    </button>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
                     <a class="dropdown-item text-danger" href="/logout">
                         <i class="fa-solid fa-right-from-bracket me-2"></i>Sair
                     </a>

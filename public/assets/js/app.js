@@ -304,6 +304,56 @@ window.App = (function ($) {
     return getComputedStyle(document.documentElement).getPropertyValue(nome).trim();
   }
 
+  /* --- Troca de senha ---------------------------------------------------------------- */
+
+  /*
+   * Vive aqui, e nao num arquivo de tela, porque o modal esta no LAYOUT: ele existe em toda
+   * pagina autenticada, e um handler por tela seria o mesmo codigo repetido em cada uma.
+   */
+  $(function () {
+    var $form = $('#form-senha');
+
+    if (!$form.length) { return; }
+
+    var modal = null;
+
+    $form.on('submit', function (e) {
+      e.preventDefault();
+
+      var $botao = $('#btn-salvar-senha');
+
+      App.limparErros($form);
+      App.ocupar($botao, true);
+
+      /*
+       * Nenhuma validacao de forca nem de conferencia aqui.
+       *
+       * A regra vive na API, e duplica-la neste ponto criaria duas verdades que divergem na
+       * primeira vez que uma mudar -- com a agravante de a versao do navegador ser a que o
+       * usuario ve. O 400 volta com o dicionario de erros por campo, e App.tratarErro ja
+       * sabe marcar cada um.
+       */
+      App.post('/api/trocar-senha', App.dadosDoFormulario($form))
+        .done(function (r) {
+          modal = modal || bootstrap.Modal.getInstance(document.getElementById('modal-senha'));
+
+          if (modal) { modal.hide(); }
+
+          $form[0].reset();
+          App.alerta('ok', r.mensagem || 'Senha alterada.');
+        })
+        .fail(function (xhr) { App.tratarErro(xhr, $form); })
+        .always(function () { App.ocupar($botao, false); });
+    });
+
+    // Reabrir o modal nao deve mostrar o que ficou da tentativa anterior -- nem os campos
+    // preenchidos, nem as marcas de erro.
+    $('#modal-senha').on('hidden.bs.modal', function () {
+      App.limparErros($form);
+      $form[0].reset();
+    });
+  });
+
   /* --- Shell ------------------------------------------------------------------------- */
 
   $(function () {

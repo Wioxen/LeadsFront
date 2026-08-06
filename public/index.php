@@ -167,6 +167,9 @@ $router->put('/api/permissoes/{uuid}', [PermissionsController::class, 'atualizar
 $router->get('/logs', [LoggersController::class, 'index']);
 $router->get('/api/logs', [LoggersController::class, 'listar']);
 
+// Troca de senha do proprio usuario. Autenticada, e por isso fica fora do bloco anonimo.
+$router->post('/api/trocar-senha', [AuthController::class, 'trocarSenha']);
+
 /*
  * A foto e servida em /{uuid}.jpg -- endereco curto, terminado em .jpg, que se parece com
  * um arquivo estatico. NAO e: continua passando pelo BFF e continua EXIGINDO SESSAO. O que

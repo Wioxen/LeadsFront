@@ -56,6 +56,68 @@ use App\View;
     <?= $conteudo ?>
 </main>
 
+<?php
+/*
+ * Modal de troca de senha, disponivel em TODA pagina autenticada -- e por isso mora no
+ * layout, e nao numa tela. O gatilho e o menu do usuario, na navbar.
+ *
+ * Fora do <nav> de proposito: modal aninhado em elemento posicionado herda contexto de
+ * empilhamento e aparece atras do fundo escurecido.
+ */
+?>
+<div class="modal fade" id="modal-senha" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="form-senha" novalidate>
+                <div class="modal-header">
+                    <h2 class="modal-title h6 fw-semibold">Trocar senha</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label" for="s-atual">Senha atual</label>
+                        <input type="password" class="form-control" id="s-atual" name="senhaAtual"
+                               required autocomplete="current-password">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="s-nova">Nova senha</label>
+                        <input type="password" class="form-control" id="s-nova" name="novaSenha"
+                               required autocomplete="new-password">
+                        <div class="form-text">
+                            Minimo 6 caracteres, com maiuscula, minuscula, numero e caractere especial.
+                        </div>
+                    </div>
+
+                    <div class="mb-1">
+                        <label class="form-label" for="s-confirma">Confirmar nova senha</label>
+                        <input type="password" class="form-control" id="s-confirma" name="confirmacaoSenha"
+                               required autocomplete="new-password">
+                    </div>
+
+                    <?php
+                    /*
+                     * Aviso honesto: nao ha revogacao de JWT no sistema, entao trocar a senha
+                     * NAO derruba sessoes abertas. Quem descobre isso sozinho, descobre tarde.
+                     */
+                    ?>
+                    <div class="alert alert-info py-2 small mt-3 mb-0">
+                        <i class="fa-solid fa-circle-info me-1"></i>
+                        Sessoes ja abertas continuam validas ate expirarem. Para cortar o acesso
+                        de alguem agora, desative o usuario.
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary btn-sm" id="btn-salvar-senha">Trocar senha</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script src="/assets/vendor/jquery/jquery.min.js"></script>
 <script src="/assets/vendor/bootstrap/bootstrap.bundle.min.js"></script>
 <script src="/assets/vendor/datatables/jquery.dataTables.min.js"></script>
