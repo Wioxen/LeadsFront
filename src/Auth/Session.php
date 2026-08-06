@@ -143,6 +143,66 @@ final class Session
         $_SESSION['access_token'] = $token;
         $_SESSION['expires_at']   = self::paraTimestamp($tokenResponse['expiresAtUtc'] ?? null);
         $_SESSION['claims']       = self::decodificar($token);
+
+        // Login concluido: o desafio que levou ate aqui nao serve mais para nada.
+        self::descartarDesafio();
+    }
+
+    /**
+     * Guarda o desafio de segundo fator entre o POST /login e a confirmacao do codigo.
+     *
+     * Fica na SESSAO, e nao num campo oculto do formulario. Um campo oculto viaja pelo
+     * navegador e volta editavel: bastaria trocar o valor para tentar concluir um desafio
+     * alheio, e ainda deixaria o identificador no DOM e no historico. Aqui ele nunca sai
+     * do servidor -- a tela do codigo nao precisa conhece-lo.
+     *
+     * NAO ha token nenhum neste estado. Continua sendo uma sessao anonima; a unica coisa
+     * que ela ganhou foi a lembranca de que uma senha ja foi conferida.
+     *
+     * @param array<string,mixed> $desafio Corpo do 202 devolvido por POST /api/auth/login.
+     */
+    public static function guardarDesafio(array $desafio, string $email): void
+    {
+        self::iniciar();
+
+        $_SESSION['2fa'] = [
+            'challenge' => (string) ($desafio['challenge'] ?? ''),
+            'expira_em' => self::paraTimestamp($desafio['expiresAtUtc'] ?? null),
+            'canais'    => array_values(array_filter(
+                (array) ($desafio['canais'] ?? []),
+                'is_string',
+            )),
+
+            // Guardado so para a tela dizer para onde o codigo foi. Nunca reenviado a API:
+            // o segundo passo se identifica pelo desafio, nao pelo email.
+            'email'     => $email,
+        ];
+    }
+
+    /**
+     * O desafio pendente, ou null quando nao ha nenhum.
+     *
+     * @return array{challenge:string,expira_em:int,canais:list<string>,email:string}|null
+     */
+    public static function desafio(): ?array
+    {
+        self::iniciar();
+
+        $desafio = $_SESSION['2fa'] ?? null;
+
+        if (!is_array($desafio) || ($desafio['challenge'] ?? '') === '') {
+            return null;
+        }
+
+        /** @var array{challenge:string,expira_em:int,canais:list<string>,email:string} $desafio */
+        return $desafio;
+    }
+
+    public static function descartarDesafio(): void
+    {
+        self::iniciar();
+
+        unset($_SESSION['2fa']);
     }
 
     /**

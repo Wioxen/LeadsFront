@@ -149,6 +149,10 @@ final class UsersController extends Controller
             'phoneWhats' => (bool) ($corpo['phoneWhats'] ?? false),
             'level'      => (int) ($corpo['level'] ?? 0),
             'status'     => (int) ($corpo['status'] ?? 1),
+
+            // Sempre enviado, inclusive false. O PUT da API e total: omitir aqui desligaria
+            // o segundo fator de quem o usa a cada edicao de cadastro.
+            'twoFactorEnabled' => (bool) ($corpo['twoFactorEnabled'] ?? false),
         ];
 
         // Só envia 'master' quem pode concede-lo. Mandar o campo de um master seria

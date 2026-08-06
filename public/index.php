@@ -106,6 +106,12 @@ $router->get('/login', [AuthController::class, 'formularioLogin']);
 $router->post('/login', [AuthController::class, 'login']);
 $router->get('/logout', [AuthController::class, 'logout']);
 
+// Segundo passo do login. Anonimas de proposito: quem chega aqui provou a senha e ainda nao
+// tem token -- a sessao guarda apenas o desafio, nao credencial nenhuma.
+$router->get('/codigo', [AuthController::class, 'formularioCodigo']);
+$router->post('/codigo', [AuthController::class, 'confirmarCodigo']);
+$router->get('/codigo/cancelar', [AuthController::class, 'cancelarCodigo']);
+
 $router->get('/esqueci-senha', [AuthController::class, 'formularioEsqueciSenha']);
 $router->post('/api/esqueci-senha', [AuthController::class, 'esqueciSenha']);
 

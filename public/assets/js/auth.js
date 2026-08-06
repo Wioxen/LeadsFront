@@ -98,4 +98,61 @@
         .always(function () { App.ocupar($botao, false); });
     });
   }
+
+  /* --- Segundo fator: campo do codigo ------------------------------------------------ */
+
+  var $codigo = $('#form-codigo');
+
+  if ($codigo.length) {
+    var $campo = $('#codigo');
+
+    /*
+     * Descarta tudo que nao for digito enquanto a pessoa digita.
+     *
+     * Colar "408 956" ou "codigo: 408956" e comum quando vem do email, e sem esta limpeza o
+     * envio gastaria uma das cinco tentativas para descobrir que o formato estava errado.
+     * A API tambem recusa o formato antes de contar a tentativa, entao isto e conveniencia,
+     * nao a defesa -- a defesa esta la.
+     */
+    $campo.on('input', function () {
+      var limpo = String(this.value).replace(/\D+/g, '').slice(0, 6);
+
+      if (limpo !== this.value) { this.value = limpo; }
+    });
+
+    /*
+     * NAO envia sozinho ao completar seis digitos.
+     *
+     * Parece uma gentileza e custa caro aqui: um digito errado no meio dispara o envio,
+     * queima uma tentativa e limpa o campo antes de a pessoa terminar de conferir. Com
+     * cinco tentativas por desafio, o botao explicito e o comportamento seguro.
+     */
+
+    var $contagem = $('#contagem');
+
+    if ($contagem.length) {
+      var restam = parseInt($contagem.data('restam'), 10) || 0;
+
+      var relogio = setInterval(function () {
+        restam -= 1;
+
+        if (restam <= 0) {
+          clearInterval(relogio);
+
+          // Quem manda e a API: ela recusaria o codigo de qualquer forma. O que muda aqui e
+          // so a tela parar de sugerir que ainda da tempo.
+          $contagem.text('O codigo expirou. Entre novamente para receber outro.');
+          $('#btn-confirmar').prop('disabled', true);
+          $campo.prop('disabled', true);
+
+          return;
+        }
+
+        var m = Math.floor(restam / 60);
+        var s = restam % 60;
+
+        $contagem.text('O codigo expira em ' + m + ':' + (s < 10 ? '0' : '') + s + '.');
+      }, 1000);
+    }
+  }
 })(jQuery);

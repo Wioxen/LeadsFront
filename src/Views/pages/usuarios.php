@@ -95,6 +95,31 @@ use App\View;
                      * Admin e atribuido so pela aplicacao, ao primeiro usuario do tenant.
                      */
                     ?>
+                    <hr class="my-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="u-2fa" name="twoFactorEnabled">
+                        <label class="form-check-label" for="u-2fa">
+                            <span class="fw-medium">Exigir codigo no login</span>
+                            <span class="d-block small" style="color:var(--text-secondary)">
+                                Alem da senha, um codigo de 6 digitos enviado por email &mdash; e
+                                tambem por SMS, se houver celular cadastrado.
+                            </span>
+                        </label>
+                    </div>
+                    <?php
+                    /*
+                     * Sem tratamento de "obrigatorio por papel" aqui.
+                     *
+                     * A API expoe twoFactorLocked, verdadeiro para Admin, cuja exigencia nao e
+                     * desligavel. So que Admin nao aparece na listagem -- a API o exclui --, e
+                     * este modal so abre a partir dela. O ramo nunca rodaria, e um ramo morto
+                     * seria lido como caminho vivo por quem vier depois.
+                     *
+                     * Se um dia o Admin passar a ser listado, o campo ja esta na resposta:
+                     * basta desabilitar a caixa quando twoFactorLocked vier verdadeiro.
+                     */
+                    ?>
+
                     <?php if ($podeConcederMaster) : ?>
                         <hr class="my-3">
                         <div class="form-check">

@@ -24,10 +24,11 @@ final class AuthController extends Controller
         $motivo = $this->query('motivo');
 
         $aviso = match ($motivo) {
-            'expirado' => 'Sua sessao expirou. Entre novamente.',
-            'csrf'     => 'Sua sessao ficou invalida. Entre novamente.',
-            'saiu'     => 'Voce saiu com seguranca.',
-            default    => null,
+            'expirado'        => 'Sua sessao expirou. Entre novamente.',
+            'csrf'            => 'Sua sessao ficou invalida. Entre novamente.',
+            'saiu'            => 'Voce saiu com seguranca.',
+            'codigo-expirado' => 'O codigo expirou ou nao vale mais. Entre de novo para receber outro.',
+            default           => null,
         };
 
         $this->ver('login', [
@@ -39,6 +40,11 @@ final class AuthController extends Controller
     /**
      * Os dois 403 possiveis tem o MESMO status e significados diferentes. A ramificacao e
      * pelo 'title' -- o texto do 'detail' pode mudar sem aviso, o title e o discriminador.
+     *
+     * O SUCESSO tambem tem duas formas, e ai o discriminador e o STATUS: 200 traz o token e
+     * encerra o login; 202 traz um desafio de segundo fator e nao traz token nenhum. Ler o
+     * corpo para adivinhar qual chegou funcionaria hoje e quebraria no dia em que um dos
+     * dois ganhasse um campo novo.
      */
     public function login(): never
     {
@@ -76,9 +82,101 @@ final class AuthController extends Controller
             ], 'auth');
         }
 
+        if ($resposta->status() === 202) {
+            Session::guardarDesafio($resposta->corpo(), $this->campo('email'));
+
+            Respond::redirecionar('/codigo');
+        }
+
         Session::autenticar($resposta->corpo());
 
         Respond::redirecionar('/');
+    }
+
+    /**
+     * Segundo passo do login: a tela do codigo.
+     *
+     * Sem desafio pendente nao ha o que confirmar, e mostrar o formulario assim mesmo daria
+     * a entender que existe um codigo a caminho. Volta ao login.
+     */
+    public function formularioCodigo(): never
+    {
+        Guard::exigeAnonimo();
+
+        $desafio = Session::desafio();
+
+        if ($desafio === null) {
+            Respond::redirecionar('/login');
+        }
+
+        $this->ver('codigo', [
+            'titulo'  => 'Confirmar acesso',
+            'desafio' => $desafio,
+        ], 'auth');
+    }
+
+    /**
+     * Confirma o codigo e abre a sessao.
+     *
+     * O identificador do desafio vem da SESSAO, nunca do formulario -- o navegador informa
+     * so os seis digitos. Aceita-lo do corpo permitiria apontar a confirmacao para um
+     * desafio de outra pessoa.
+     *
+     * Os 401 se dividem em dois, e a diferenca muda o que a tela faz: "Codigo expirado"
+     * significa que nao adianta digitar de novo, entao o desafio e descartado e o caminho e
+     * refazer o login; "Codigo invalido" deixa o formulario de pe para nova tentativa.
+     */
+    public function confirmarCodigo(): never
+    {
+        Guard::exigeAnonimo();
+
+        $desafio = Session::desafio();
+
+        if ($desafio === null) {
+            Respond::redirecionar('/login');
+        }
+
+        try {
+            $resposta = $this->api->post('/api/auth/two-factor', [
+                'challenge' => $desafio['challenge'],
+                'codigo'    => $this->campo('codigo'),
+            ], exigeToken: false);
+        } catch (ApiException $e) {
+            if ($e->status() === 401 && str_contains($e->title(), 'expirado')) {
+                Session::descartarDesafio();
+
+                Respond::redirecionar('/login?motivo=codigo-expirado');
+            }
+
+            $this->ver('codigo', [
+                'titulo'  => 'Confirmar acesso',
+                'desafio' => $desafio,
+                'erro'    => $e->detail(),
+            ], 'auth');
+        }
+
+        // Descarta o desafio junto com a gravacao do token, dentro de autenticar().
+        Session::autenticar($resposta->corpo());
+
+        Respond::redirecionar('/');
+    }
+
+    /**
+     * Desiste do segundo fator e volta ao login.
+     *
+     * O desafio segue vivo na API ate expirar -- nada aqui o cancela, e nao ha endpoint para
+     * isso. O que esta rota faz e esquecer o desafio DESTA sessao, para a tela nao ficar
+     * presa num codigo que o usuario nao vai digitar.
+     *
+     * GET, e portanto sem CSRF: o Router so exige o token nos metodos de escrita. O pior que
+     * um pedido forjado consegue e apagar um desafio pendente de quem ainda nao entrou --
+     * que se resolve refazendo o login. Nao ha sessao, dado nem privilegio em jogo.
+     */
+    public function cancelarCodigo(): never
+    {
+        Session::descartarDesafio();
+
+        Respond::redirecionar('/login');
     }
 
     public function logout(): never

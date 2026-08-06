@@ -28,7 +28,12 @@
       // Cor nunca e o unico sinal: o badge leva rotulo em texto.
       var papel = '<span class="badge-suave ' + (u.roleType === 1 ? 'info' : 'neutro') + '">' +
         App.escapar(PAPEIS[u.roleType] || u.roleType) + '</span>' +
-        (u.master ? ' <span class="badge-suave ok" title="Acesso livre, sem perfil">master</span>' : '');
+        (u.master ? ' <span class="badge-suave ok" title="Acesso livre, sem perfil">master</span>' : '') +
+        // Icone com title e rotulo acessivel: quem usa leitor de tela nao ve o cadeado.
+        (u.twoFactorEnabled
+          ? ' <i class="fa-solid fa-shield-halved" title="Exige codigo no login"' +
+            ' style="color:var(--brand-success)" aria-label="Exige codigo no login"></i>'
+          : '');
 
       var situacao = u.status === 1
         ? '<span class="badge-suave ok">Ativo</span>'
@@ -122,6 +127,7 @@
       $('[name="status"]', $form).val(u.status);
       $('[name="level"]', $form).val(u.level || 0);
       $('[name="master"]', $form).prop('checked', !!u.master);
+      $('[name="twoFactorEnabled"]', $form).prop('checked', !!u.twoFactorEnabled);
     }
 
     $('#modal-titulo').text(u ? 'Editar usuario' : 'Novo usuario');
@@ -204,8 +210,15 @@
             }).then(function (r) {
               if (!r.isConfirmed) { return; }
 
-              // Status 2 = Inactive. O usuario para de autenticar e o historico continua
-              // atribuivel a ele.
+              /*
+               * Status 2 = Inactive. O usuario para de autenticar e o historico continua
+               * atribuivel a ele.
+               *
+               * O PUT da API e TOTAL: campo ausente e campo apagado, nao campo preservado.
+               * Por isso todos os valores atuais sao reenviados -- inclusive
+               * twoFactorEnabled, cuja omissao desligaria o segundo fator de quem o usa,
+               * como efeito colateral silencioso de apenas desativar o acesso.
+               */
               App.put('/api/usuarios/' + uuid, {
                 firstName: usuario.firstName,
                 lastName: usuario.lastName,
@@ -214,6 +227,7 @@
                 phoneWhats: !!usuario.phoneWhats,
                 level: usuario.level || 0,
                 master: !!usuario.master,
+                twoFactorEnabled: !!usuario.twoFactorEnabled,
                 status: 2
               })
                 .done(function () { App.alerta('ok', 'Acesso desativado.'); carregar(); })
