@@ -113,6 +113,11 @@ $router->get('/codigo', [AuthController::class, 'formularioCodigo']);
 $router->post('/codigo', [AuthController::class, 'confirmarCodigo']);
 $router->get('/codigo/cancelar', [AuthController::class, 'cancelarCodigo']);
 
+// Escolha de organizacao, quando a mesma senha vale em mais de uma. Anonimas: quem chega
+// aqui provou a senha e ainda nao tem token -- a sessao guarda so a escolha pendente.
+$router->get('/escolher-organizacao', [AuthController::class, 'formularioEscolha']);
+$router->post('/escolher-organizacao', [AuthController::class, 'escolherOrganizacao']);
+
 $router->get('/esqueci-senha', [AuthController::class, 'formularioEsqueciSenha']);
 $router->post('/api/esqueci-senha', [AuthController::class, 'esqueciSenha']);
 

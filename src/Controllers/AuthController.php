@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Auth\Guard;
 use App\Auth\Session;
 use App\Http\ApiException;
+use App\Http\ApiResponse;
 use App\Http\Respond;
 
 /**
@@ -31,6 +32,7 @@ final class AuthController extends Controller
             'csrf'            => 'Sua sessao ficou invalida. Entre novamente.',
             'saiu'            => 'Voce saiu com seguranca.',
             'codigo-expirado' => 'O codigo expirou ou nao vale mais. Entre de novo para receber outro.',
+            'escolha-expirada' => 'A escolha de organizacao expirou. Entre novamente.',
             default           => null,
         };
 
@@ -85,8 +87,27 @@ final class AuthController extends Controller
             ], 'auth');
         }
 
+        $this->concluirLogin($resposta, $this->campo('email'));
+    }
+
+    /**
+     * Traduz os TRES desfechos do login em navegacao.
+     *
+     * Compartilhado pelo login e pela escolha de organizacao, porque a escolha pode terminar
+     * em token OU em desafio de segundo fator -- e repetir a ramificacao nos dois lugares
+     * criaria a chance de um deles esquecer um caso.
+     */
+    private function concluirLogin(ApiResponse $resposta, string $email): never
+    {
+        // 300: a senha abriu mais de uma organizacao e falta escolher qual.
+        if ($resposta->status() === 300) {
+            Session::guardarEscolha($resposta->corpo());
+
+            Respond::redirecionar('/escolher-organizacao');
+        }
+
         if ($resposta->status() === 202) {
-            Session::guardarDesafio($resposta->corpo(), $this->campo('email'));
+            Session::guardarDesafio($resposta->corpo(), $email);
 
             Respond::redirecionar('/codigo');
         }
@@ -94,6 +115,77 @@ final class AuthController extends Controller
         Session::autenticar($resposta->corpo());
 
         Respond::redirecionar('/');
+    }
+
+    /**
+     * Tela de escolha da organizacao.
+     *
+     * Sem escolha pendente nao ha o que escolher, e mostrar a lista assim mesmo exibiria
+     * organizacoes fora de qualquer contexto. Volta ao login.
+     */
+    public function formularioEscolha(): never
+    {
+        Guard::exigeAnonimo();
+
+        $escolha = Session::escolha();
+
+        if ($escolha === null) {
+            Respond::redirecionar('/login');
+        }
+
+        $this->ver('escolher-organizacao', [
+            'titulo'  => 'Escolher organizacao',
+            'tenants' => $escolha['tenants'],
+        ], 'auth');
+    }
+
+    /**
+     * Conclui a escolha.
+     *
+     * O TOKEN de escolha vem da sessao; do formulario vem so o identificador da organizacao.
+     * Aceitar o token do corpo permitiria apresentar um obtido de outra forma.
+     *
+     * A API confere se a organizacao pedida esta entre as candidatas daquele token -- esta e
+     * a barreira de verdade. O que se faz aqui e nao ampliar a superficie sem necessidade.
+     */
+    public function escolherOrganizacao(): never
+    {
+        Guard::exigeAnonimo();
+
+        $escolha = Session::escolha();
+
+        if ($escolha === null) {
+            Respond::redirecionar('/login');
+        }
+
+        try {
+            $resposta = $this->api->post('/api/auth/select-tenant', [
+                'selectionToken' => $escolha['token'],
+                'tenantUuid'     => $this->campo('tenantUuid'),
+            ], exigeToken: false);
+        } catch (ApiException $e) {
+            /*
+             * 401 aqui significa token de escolha vencido ou organizacao fora da lista. Nos
+             * dois casos nao ha o que corrigir na tela: o caminho e refazer o login.
+             */
+            if ($e->status() === 401) {
+                Session::descartarEscolha();
+
+                Respond::redirecionar('/login?motivo=escolha-expirada');
+            }
+
+            $this->ver('escolher-organizacao', [
+                'titulo'  => 'Escolher organizacao',
+                'tenants' => $escolha['tenants'],
+                'erro'    => $e->detail(),
+            ], 'auth');
+        }
+
+        Session::descartarEscolha();
+
+        // Pode voltar token OU desafio de segundo fator: a conta escolhida tem os proprios
+        // portoes, e eles so podem ser aplicados agora.
+        $this->concluirLogin($resposta, '');
     }
 
     /**

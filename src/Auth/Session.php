@@ -144,8 +144,9 @@ final class Session
         $_SESSION['expires_at']   = self::paraTimestamp($tokenResponse['expiresAtUtc'] ?? null);
         $_SESSION['claims']       = self::decodificar($token);
 
-        // Login concluido: o desafio que levou ate aqui nao serve mais para nada.
+        // Login concluido: nem o desafio nem a escolha que levaram ate aqui servem mais.
         self::descartarDesafio();
+        self::descartarEscolha();
     }
 
     /**
@@ -203,6 +204,55 @@ final class Session
         self::iniciar();
 
         unset($_SESSION['2fa']);
+    }
+
+    /**
+     * Guarda a escolha de organizacao pendente entre o 300 do login e a selecao.
+     *
+     * Mesma razao do desafio de segundo fator: fica na SESSAO, nao num campo oculto. O token
+     * de escolha nao e credencial -- devolve no maximo o que a senha ja devolveria --, mas
+     * deixa-lo no DOM e no historico nao traz beneficio nenhum, e um campo editavel convida a
+     * troca do valor.
+     *
+     * @param array<string,mixed> $escolha Corpo do 300 devolvido por POST /api/auth/login.
+     */
+    public static function guardarEscolha(array $escolha): void
+    {
+        self::iniciar();
+
+        $_SESSION['escolha_tenant'] = [
+            'token'   => (string) ($escolha['selectionToken'] ?? ''),
+            'tenants' => array_values(array_filter(
+                (array) ($escolha['tenants'] ?? []),
+                static fn ($t): bool => is_array($t) && isset($t['uuid'], $t['name']),
+            )),
+        ];
+    }
+
+    /**
+     * A escolha pendente, ou null quando nao ha nenhuma.
+     *
+     * @return array{token:string,tenants:list<array{uuid:string,name:string}>}|null
+     */
+    public static function escolha(): ?array
+    {
+        self::iniciar();
+
+        $escolha = $_SESSION['escolha_tenant'] ?? null;
+
+        if (!is_array($escolha) || ($escolha['token'] ?? '') === '' || ($escolha['tenants'] ?? []) === []) {
+            return null;
+        }
+
+        /** @var array{token:string,tenants:list<array{uuid:string,name:string}>} $escolha */
+        return $escolha;
+    }
+
+    public static function descartarEscolha(): void
+    {
+        self::iniciar();
+
+        unset($_SESSION['escolha_tenant']);
     }
 
     /**
