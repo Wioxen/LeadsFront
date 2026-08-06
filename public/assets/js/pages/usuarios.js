@@ -125,9 +125,24 @@
   // prende o arquivo na memoria do navegador ate a aba fechar.
   var previaLocal = null;
 
-  function mostrarFoto(src) {
-    if (previaLocal) { URL.revokeObjectURL(previaLocal); previaLocal = null; }
+  /*
+   * Libera a URL do preview ANTERIOR.
+   *
+   * Separado de mostrarFoto de proposito, e a separacao e o conserto de um bug real: com a
+   * revogacao dentro daquela funcao, quem exibia um blob recem-criado o revogava no mesmo
+   * passo em que o atribuia ao src -- o navegador recebia um endereco que tinha acabado de
+   * deixar de existir e mostrava imagem quebrada.
+   *
+   * Regra: chamar ANTES de criar a proxima URL, nunca depois.
+   */
+  function liberarPrevia() {
+    if (previaLocal) {
+      URL.revokeObjectURL(previaLocal);
+      previaLocal = null;
+    }
+  }
 
+  function mostrarFoto(src) {
     if (src) {
       $('#u-foto-previa').attr('src', src).removeClass('d-none');
       $('#u-foto-vazia').addClass('d-none');
@@ -144,6 +159,8 @@
 
     if (!arquivo) { return; }
 
+    liberarPrevia();
+
     fotoEscolhida = arquivo;
     previaLocal = URL.createObjectURL(arquivo);
 
@@ -157,6 +174,7 @@
 
     // Nunca chegou a existir no servidor: basta desfazer a escolha.
     if (!uuid || fotoEscolhida) {
+      liberarPrevia();
       fotoEscolhida = null;
       $('#u-foto').val('');
       mostrarFoto(null);
@@ -170,6 +188,7 @@
 
     App.del('/api/usuarios/' + uuid + '/foto')
       .done(function () {
+        liberarPrevia();
         mostrarFoto(null);
         $('#u-foto').val('');
         App.alerta('ok', 'Foto removida.');
@@ -214,6 +233,7 @@
     $form[0].reset();
     $('#aviso-master').addClass('d-none');
 
+    liberarPrevia();
     fotoEscolhida = null;
     $('#u-foto').val('');
 
