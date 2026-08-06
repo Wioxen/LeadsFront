@@ -324,21 +324,33 @@ body.sidebar-recolhida .conteudo { margin-left: var(--sidebar-recolhida); }
  * Redesenhado com o glifo do Font Awesome em vez de imagem: acompanha a cor do tema
  * sozinho, escala com o zoom e nao pesa um arquivo a mais.
  */
-table.dataTable > tbody > tr > td.dtr-control::before {
-  content: "\f067";                    /* fa-plus */
-  font-family: "Font Awesome 6 Free";
+/*
+ * O SELETOR precisa repetir '.dtr-inline.collapsed' do plugin.
+ *
+ * A regra dele e table.dataTable.dtr-inline.collapsed > ... > td.dtr-control:before --
+ * quatro classes. Uma versao curta, com duas, PERDE por especificidade e nao aplica nada,
+ * por mais que o arquivo esteja carregado. Foi o que aconteceu na primeira tentativa: o
+ * CSS era servido, continha o glifo, e mesmo assim a tela nao mudava.
+ *
+ * Esta variante desenha triangulos de TEXTO (► fechado, ▼ aberto), e nao o circulo verde
+ * da variante classica -- outro motivo para nao confiar em memoria e ler o vendor.
+ */
+table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control::before,
+table.dataTable.dtr-inline.collapsed > tbody > tr > th.dtr-control::before {
+  content: "\f067" !important;         /* fa-plus */
+  font-family: "Font Awesome 6 Free" !important;
   font-weight: 900;
 
-  /* Anula o desenho do plugin: fundo verde, borda, sombra e o glifo que ele injeta. */
   background: color-mix(in srgb, var(--brand-primary) 12%, transparent) !important;
   border: none !important;
   box-shadow: none !important;
-  color: var(--brand-primary);
+  color: var(--brand-primary) !important;
 
-  display: inline-grid;
+  display: inline-grid !important;
   place-items: center;
   width: 1.5rem;
   height: 1.5rem;
+  margin-right: .5rem;
   border-radius: var(--radius-sm) !important;
   font-size: .75rem;
   line-height: 1;
@@ -346,10 +358,11 @@ table.dataTable > tbody > tr > td.dtr-control::before {
 }
 
 /* Aberta: o mesmo controle vira o "fechar" da linha. */
-table.dataTable > tbody > tr.parent > td.dtr-control::before {
-  content: "\f00d";                    /* fa-xmark */
+table.dataTable.dtr-inline.collapsed > tbody > tr.parent > td.dtr-control::before,
+table.dataTable.dtr-inline.collapsed > tbody > tr.parent > th.dtr-control::before {
+  content: "\f00d" !important;         /* fa-xmark */
   background: var(--brand-primary) !important;
-  color: #fff;
+  color: #fff !important;
 }
 
 table.dataTable > tbody > tr > td.dtr-control {
@@ -366,11 +379,11 @@ table.dataTable > tbody > tr > td.dtr-control {
   -webkit-tap-highlight-color: transparent;
 }
 
-table.dataTable > tbody > tr > td.dtr-control:hover::before {
+table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control:hover::before {
   background: color-mix(in srgb, var(--brand-primary) 22%, transparent) !important;
 }
 
-table.dataTable > tbody > tr.parent > td.dtr-control:hover::before {
+table.dataTable.dtr-inline.collapsed > tbody > tr.parent > td.dtr-control:hover::before {
   background: color-mix(in srgb, var(--brand-primary) 85%, #000) !important;
 }
 
