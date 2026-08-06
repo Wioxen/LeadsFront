@@ -325,11 +325,11 @@ body.sidebar-recolhida .conteudo { margin-left: var(--sidebar-recolhida); }
  * sozinho, escala com o zoom e nao pesa um arquivo a mais.
  */
 table.dataTable > tbody > tr > td.dtr-control::before {
-  content: "\f105";                    /* fa-chevron-right */
+  content: "\f067";                    /* fa-plus */
   font-family: "Font Awesome 6 Free";
   font-weight: 900;
 
-  /* Anula o desenho do plugin: fundo, borda, sombra e o "+" que ele injeta. */
+  /* Anula o desenho do plugin: fundo verde, borda, sombra e o glifo que ele injeta. */
   background: color-mix(in srgb, var(--brand-primary) 12%, transparent) !important;
   border: none !important;
   box-shadow: none !important;
@@ -340,14 +340,14 @@ table.dataTable > tbody > tr > td.dtr-control::before {
   width: 1.5rem;
   height: 1.5rem;
   border-radius: var(--radius-sm) !important;
-  font-size: .8125rem;
+  font-size: .75rem;
   line-height: 1;
-  transition: transform .15s ease-out, background-color .15s ease-out;
+  transition: background-color .15s ease-out;
 }
 
-/* Aberta: a seta aponta para baixo, indicando que o conteudo desceu. */
+/* Aberta: o mesmo controle vira o "fechar" da linha. */
 table.dataTable > tbody > tr.parent > td.dtr-control::before {
-  transform: rotate(90deg);
+  content: "\f00d";                    /* fa-xmark */
   background: var(--brand-primary) !important;
   color: #fff;
 }
@@ -356,10 +356,22 @@ table.dataTable > tbody > tr > td.dtr-control {
   /* Alvo de toque confortavel: 44px e o minimo recomendado para o dedo. */
   padding-left: 2.75rem !important;
   cursor: pointer;
+
+  /*
+   * Sem isto, tocar duas vezes seguidas no controle -- abrir e fechar -- faz o navegador
+   * do celular selecionar o glifo e abrir o menu de copiar por cima da tabela.
+   */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 table.dataTable > tbody > tr > td.dtr-control:hover::before {
   background: color-mix(in srgb, var(--brand-primary) 22%, transparent) !important;
+}
+
+table.dataTable > tbody > tr.parent > td.dtr-control:hover::before {
+  background: color-mix(in srgb, var(--brand-primary) 85%, #000) !important;
 }
 
 table.dataTable > tbody > tr.child ul.dtr-details {
