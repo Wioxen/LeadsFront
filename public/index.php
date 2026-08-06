@@ -150,8 +150,8 @@ $router->post('/api/usuarios/{uuid}/reenviar-verificacao', [UsersController::cla
 // A foto passa pelo BFF como o resto: o navegador nunca fala com a API. O GET responde
 // imagem, e nao JSON, para poder ser o src de um <img>.
 $router->post('/api/usuarios/{uuid}/foto', [UsersController::class, 'enviarFoto']);
-$router->get('/api/usuarios/{uuid}/foto', [UsersController::class, 'foto']);
 $router->delete('/api/usuarios/{uuid}/foto', [UsersController::class, 'removerFoto']);
+
 
 $router->get('/perfis', [ProfilesController::class, 'index']);
 $router->get('/api/perfis', [ProfilesController::class, 'listar']);
@@ -166,6 +166,16 @@ $router->put('/api/permissoes/{uuid}', [PermissionsController::class, 'atualizar
 
 $router->get('/logs', [LoggersController::class, 'index']);
 $router->get('/api/logs', [LoggersController::class, 'listar']);
+
+/*
+ * A foto e servida em /{uuid}.jpg -- endereco curto, terminado em .jpg, que se parece com
+ * um arquivo estatico. NAO e: continua passando pelo BFF e continua EXIGINDO SESSAO. O que
+ * mudou e so a forma do endereco.
+ *
+ * Fica no fim do arquivo de rotas de proposito. O padrao e amplo -- 36 caracteres na raiz --
+ * e declarado antes capturaria qualquer rota futura com essa forma.
+ */
+$router->get('/{uuid}.jpg', [UsersController::class, 'foto']);
 
 $router->despachar(
     $_SERVER['REQUEST_METHOD'] ?? 'GET',

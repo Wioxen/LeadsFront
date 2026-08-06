@@ -72,7 +72,7 @@
 
       // Miniatura so quando ha foto: um <img> sem src pisca o icone de imagem quebrada.
       var avatar = u.photo
-        ? '<img src="/api/usuarios/' + App.escapar(u.uuid) + '/foto" alt="" width="28" height="28" ' +
+        ? '<img src="/' + App.escapar(u.uuid) + '.jpg" alt="" width="28" height="28" ' +
           'class="rounded-circle me-2 border" style="object-fit:cover;vertical-align:middle">'
         : '<span class="rounded-circle me-2 border d-inline-flex align-items-center justify-content-center" ' +
           'style="width:28px;height:28px;vertical-align:middle;background:var(--surface-muted);' +
@@ -154,19 +154,62 @@
     }
   }
 
+  /*
+   * Escolher a foto JA ENVIA, quando o usuario existe.
+   *
+   * Assim o preview passa a ser a URL do servidor e o endereco 'blob:' desaparece -- ele so
+   * fazia sentido enquanto o arquivo existia unicamente no navegador. De quebra, o retorno
+   * e imediato: erro de formato ou de tamanho aparece na hora da escolha, e nao depois de a
+   * pessoa preencher o resto do formulario e salvar.
+   *
+   * Em CADASTRO NOVO nao ha o que fazer: o uuid so nasce ao salvar, e sem ele nao existe
+   * endereco para receber o arquivo. Ai o preview local continua sendo a unica opcao.
+   */
   $('#u-foto').on('change', function () {
     var arquivo = this.files && this.files[0];
 
     if (!arquivo) { return; }
 
-    liberarPrevia();
+    var uuid = $('[name="uuid"]', $('#form-usuario')).val();
 
-    fotoEscolhida = arquivo;
-    previaLocal = URL.createObjectURL(arquivo);
+    if (!uuid) {
+      liberarPrevia();
 
-    // Preview do arquivo local, antes de qualquer envio. A conferencia de verdade -- se e
-    // mesmo uma imagem -- e da API, pelos primeiros bytes; aqui e so o que a pessoa ve.
-    mostrarFoto(previaLocal);
+      fotoEscolhida = arquivo;
+      previaLocal = URL.createObjectURL(arquivo);
+
+      // A conferencia de verdade -- se e mesmo uma imagem -- e da API, pelos primeiros
+      // bytes. Aqui e so o que a pessoa ve.
+      mostrarFoto(previaLocal);
+
+      return;
+    }
+
+    var $rotulo = $('label[for="u-foto"]');
+
+    App.ocupar($rotulo, true);
+
+    enviarArquivo(uuid, arquivo)
+      .done(function () {
+        liberarPrevia();
+
+        // Nada pendente: o arquivo ja esta no servidor, e salvar o formulario nao deve
+        // reenvia-lo.
+        fotoEscolhida = null;
+
+        // O 't' derruba o cache: a URL nao muda quando a foto muda, e sem ele o navegador
+        // continuaria exibindo a anterior.
+        mostrarFoto('/' + uuid + '.jpg?t=' + Date.now());
+
+        App.alerta('ok', 'Foto atualizada.');
+        carregar();
+      })
+      .fail(function (xhr) {
+        // A escolha nao vale: limpa o campo para a pessoa poder repetir com outro arquivo.
+        $('#u-foto').val('');
+        App.tratarErro(xhr);
+      })
+      .always(function () { App.ocupar($rotulo, false); });
   });
 
   $('#btn-remover-foto').on('click', function () {
@@ -205,9 +248,14 @@
   function enviarFoto(uuid) {
     if (!fotoEscolhida) { return $.Deferred().resolve().promise(); }
 
+    return enviarArquivo(uuid, fotoEscolhida);
+  }
+
+  /** Envia UM arquivo para o usuario indicado. */
+  function enviarArquivo(uuid, arquivo) {
     var dados = new FormData();
 
-    dados.append('file', fotoEscolhida);
+    dados.append('file', arquivo);
 
     return $.ajax({
       url: '/api/usuarios/' + uuid + '/foto',
@@ -239,7 +287,7 @@
 
     // Com uuid na URL, o navegador busca a imagem pelo BFF. O parametro de tempo evita que
     // ele reaproveite a foto anterior do cache logo depois de uma troca.
-    mostrarFoto(u && u.photo ? '/api/usuarios/' + u.uuid + '/foto?t=' + Date.now() : null);
+    mostrarFoto(u && u.photo ? '/' + u.uuid + '.jpg?t=' + Date.now() : null);
 
     $('[name="uuid"]', $form).val(u ? u.uuid : '');
 
