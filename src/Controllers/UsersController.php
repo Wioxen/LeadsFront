@@ -80,7 +80,7 @@ final class UsersController extends Controller
      */
     public function enviarFoto(array $parametros): never
     {
-        Guard::exigeAdministrador(true);
+        Guard::exigeLogin(true);
 
         $arquivo = $_FILES['file'] ?? null;
 
@@ -131,7 +131,10 @@ final class UsersController extends Controller
      */
     public function foto(array $parametros): never
     {
-        Guard::exigeAdministrador(true);
+        // Basta estar autenticado: na API a foto saiu do recurso administrativo e vale para
+        // qualquer usuario da organizacao. Exigir papel aqui deixaria avatar quebrado em
+        // tela comum, recusando algo que o servidor entregaria.
+        Guard::exigeLogin(true);
 
         $foto = $this->api->baixar("/api/users/{$parametros['uuid']}/photo");
 
@@ -156,7 +159,7 @@ final class UsersController extends Controller
     /** @param array<string,string> $parametros */
     public function removerFoto(array $parametros): never
     {
-        Guard::exigeAdministrador(true);
+        Guard::exigeLogin(true);
 
         $resposta = $this->api->delete("/api/users/{$parametros['uuid']}/photo");
 

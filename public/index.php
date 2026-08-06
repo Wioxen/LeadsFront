@@ -15,6 +15,7 @@ use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
 use App\Controllers\LeadsController;
 use App\Controllers\LoggersController;
+use App\Controllers\MeController;
 use App\Controllers\PermissionsController;
 use App\Controllers\ProfilesController;
 use App\Controllers\UsersController;
@@ -136,6 +137,14 @@ $router->get('/api/leads', [LeadsController::class, 'listar']);
 $router->post('/api/leads', [LeadsController::class, 'criar']);
 $router->put('/api/leads/{uuid}', [LeadsController::class, 'atualizar']);
 $router->delete('/api/leads/{uuid}', [LeadsController::class, 'excluir']);
+
+// Meus dados: qualquer autenticado, sem exigencia de papel. Fica antes do bloco
+// administrativo para deixar a diferenca visivel na leitura.
+$router->get('/meus-dados', [MeController::class, 'index']);
+$router->get('/api/meus-dados', [MeController::class, 'obter']);
+$router->put('/api/meus-dados', [MeController::class, 'atualizar']);
+$router->post('/api/meus-dados/foto', [MeController::class, 'enviarFoto']);
+$router->delete('/api/meus-dados/foto', [MeController::class, 'removerFoto']);
 
 // --- Paginas administrativas (Admin ou master) ------------------------------------------
 $router->get('/usuarios', [UsersController::class, 'index']);
