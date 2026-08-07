@@ -508,7 +508,7 @@ final class AuthController extends Controller
      */
     private function concluirComToken(string $endpoint): never
     {
-        $this->api->post($endpoint, [
+        $resposta = $this->api->post($endpoint, [
             'token' => $this->campo('token'),
             'senha' => $this->campo('senha'),
 
@@ -540,6 +540,30 @@ final class AuthController extends Controller
          */
         Session::desautenticar();
 
-        $this->json(['destino' => '/login?motivo=senha-definida']);
+        /*
+         * Tres desfechos, os MESMOS do login, distinguidos pelo status.
+         *
+         * Voltou a abrir sessao aqui: mandar quem acabou de definir a senha repetir o login
+         * so fazia sentido enquanto a API nao sabia em qual organizacao entrar -- e ela sabe,
+         * quando ha uma so. Quando ha mais, a pergunta e feita, nao empurrada.
+         *
+         * A desautenticacao acima continua valendo e vem ANTES: a sessao que existia era de
+         * outra pessoa, e o token novo precisa substitui-la, nao conviver com ela.
+         */
+        if ($resposta->status() === 300) {
+            Session::guardarEscolha($resposta->corpo());
+
+            $this->json(['destino' => '/escolher-organizacao']);
+        }
+
+        if ($resposta->status() === 202) {
+            Session::guardarDesafio($resposta->corpo(), '');
+
+            $this->json(['destino' => '/2fa']);
+        }
+
+        Session::autenticar($resposta->corpo());
+
+        $this->json(['destino' => '/']);
     }
 }

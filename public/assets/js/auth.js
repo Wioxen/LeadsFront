@@ -76,11 +76,11 @@
       })
         .done(function (r) {
           /*
-           * A API responde 204 e NAO emite token: com varias organizacoes possiveis, este
-           * fluxo nao tem como saber em qual a pessoa quer entrar. Quem pergunta isso e o
-           * login, entao e para la que se vai.
+           * O destino vem do servidor porque ha tres: painel, escolha de organizacao ou tela
+           * do codigo. Decidir aqui exigiria a tela conhecer as regras de sessao da API, e
+           * elas ja mudaram uma vez.
            */
-          App.alerta('ok', 'Senha definida. Entre com ela para continuar.');
+          App.alerta('ok', 'Senha definida.');
           setTimeout(function () { window.location.href = r.destino || '/'; }, 600);
         })
         .fail(function (xhr) {
