@@ -203,9 +203,9 @@ use App\View;
                     <?php else : ?>
                         <?php
                         /*
-                         * So o papel Admin concede a marca. Enviado por um master, o campo e
-                         * IGNORADO pela API, em silencio -- entao a caixa nem aparece. Mostra-la
-                         * seria exibir um controle que nao faz nada.
+                         * Quem nao e Admin nem master nao concede a marca: a API IGNORA o campo
+                         * em silencio, entao a caixa nem aparece. Mostra-la seria exibir um
+                         * controle que aceita o clique, diz "salvo" e nao muda nada.
                          */
                         ?>
                     <?php endif; ?>

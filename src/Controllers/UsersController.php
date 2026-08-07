@@ -29,7 +29,14 @@ final class UsersController extends Controller
             // So o papel Admin concede a marca de master. Enviado por um master, o campo e
             // IGNORADO em silencio pela API -- entao a caixa nem aparece, para a tela nao
             // exibir um controle que nao faz nada.
-            'podeConcederMaster' => Session::papel() === 'Admin',
+            /*
+             * Admin OU master concedem a marca -- espelha ResolveMaster na API.
+             *
+             * Se divergir, o campo aparece e o valor e descartado em silencio: a pessoa marca,
+             * salva, le "salvo" e nada muda. E por isso que a condicao mora aqui e nao no
+             * template, com o mesmo criterio dos dois lados.
+             */
+            'podeConcederMaster' => Session::papel() === 'Admin' || Session::claim('master') === 'true',
         ]);
     }
 
