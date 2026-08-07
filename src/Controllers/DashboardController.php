@@ -44,10 +44,24 @@ final class DashboardController extends Controller
         $periodo = (int) ($this->query('periodo', '30') ?: '30');
         $periodo = in_array($periodo, [7, 30, 90], true) ? $periodo : 30;
 
+        /*
+         * A ORGANIZACAO entra na chave, e nao so o periodo.
+         *
+         * Estes numeros sao de um tenant especifico. Sem isto, trocar de organizacao servia o
+         * painel da anterior ate o cache vencer -- com o cabecalho ja mostrando a nova, que e
+         * a pior forma de errar: o dado parece conferido justamente porque o rotulo ao lado
+         * esta certo.
+         *
+         * O defeito e antigo e era inalcancavel: so se trocava de organizacao SAINDO, e sair
+         * destroi a sessao junto com o cache. O seletor da barra tornou o caminho possivel.
+         */
+        $organizacao = Session::claim('TenantUuid') ?? '';
+
         $cache = $_SESSION['dashboard_cache'] ?? null;
 
         if (is_array($cache)
             && ($cache['periodo'] ?? null) === $periodo
+            && ($cache['organizacao'] ?? null) === $organizacao
             && ($cache['expira'] ?? 0) > time()
         ) {
             $this->json($cache['dados'] + ['cacheado' => true]);
@@ -62,9 +76,10 @@ final class DashboardController extends Controller
         $dados['atividades'] = $this->atividades();
 
         $_SESSION['dashboard_cache'] = [
-            'periodo' => $periodo,
-            'expira'  => time() + self::CACHE_SEGUNDOS,
-            'dados'   => $dados,
+            'periodo'     => $periodo,
+            'organizacao' => $organizacao,
+            'expira'      => time() + self::CACHE_SEGUNDOS,
+            'dados'       => $dados,
         ];
 
         $this->json($dados + ['cacheado' => false]);

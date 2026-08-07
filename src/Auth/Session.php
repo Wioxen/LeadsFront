@@ -147,6 +147,17 @@ final class Session
         // Login concluido: nem o desafio nem a escolha que levaram ate aqui servem mais.
         self::descartarDesafio();
         self::descartarEscolha();
+
+        /*
+         * Todo dado derivado do token anterior morre com ele.
+         *
+         * Este metodo e o UNICO ponto em que a organizacao da sessao pode mudar, entao e aqui
+         * que o material acumulado sob a anterior deixa de valer. O cache do painel ja se
+         * protege pela propria chave; isto e a segunda camada, para um cache futuro nao
+         * precisar lembrar sozinho de fazer o mesmo -- e o autor dele nao descobrir por
+         * relatorio de que o painel mostra a organizacao errada.
+         */
+        unset($_SESSION['dashboard_cache']);
     }
 
     /**
