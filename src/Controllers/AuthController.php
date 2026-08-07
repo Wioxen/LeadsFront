@@ -445,7 +445,23 @@ final class AuthController extends Controller
         string $titulo,
         string $acao,
     ): never {
-        Guard::exigeAnonimo();
+        /*
+         * ENCERRA a sessao em vez de exigir anonimato.
+         *
+         * Aqui estava `Guard::exigeAnonimo()`, e ele quebrava o caso mais comum: o link do
+         * convite e aberto no computador de quem cadastrou, que continua logado. O guarda
+         * desviava para o painel, a pessoa nunca via o formulario -- e, se o token do outro ja
+         * tivesse vencido, o painel tomava 401 e ela caia em "sua sessao expirou". Tres contas
+         * em producao passaram por isso.
+         *
+         * Este link identifica OUTRA pessoa. A sessao que estiver aberta no navegador nao tem
+         * nada a ver com ela, e mante-la seria pior que descarta-la: quem acabasse de definir a
+         * senha continuaria navegando dentro da conta alheia.
+         *
+         * Desautenticar em vez de encerrar: destruir a sessao levaria junto o token CSRF que
+         * esta pagina acabou de emitir, e o POST seguinte chegaria como 419.
+         */
+        Session::desautenticar();
 
         $token = $this->query('token');
 
@@ -501,6 +517,28 @@ final class AuthController extends Controller
             // quem tem de recusar e a API, e um valor forjado aqui esconderia a divergencia.
             'confirmacaoSenha' => $this->campo('confirmacaoSenha'),
         ], exigeToken: false);
+
+        /*
+         * ENCERRA a sessao do navegador antes de mandar ao login.
+         *
+         * Definir uma senha e ato de OUTRA pessoa que nao a da sessao: quem abre o link do
+         * convite quase sempre esta no computador de quem cadastrou, e esse alguem continua
+         * logado. Sem encerrar, duas coisas davam errado ao mesmo tempo.
+         *
+         * A visivel: /login tem Guard::exigeAnonimo, entao quem ja esta logado era desviado
+         * para o painel e o aviso "Senha definida" se perdia no caminho. Se o token do outro
+         * ja tivesse vencido, o painel tomava 401 e o JS mandava para /login?motivo=expirado
+         * -- e a pessoa lia "sua sessao expirou" logo apos definir a senha com sucesso,
+         * concluindo que tinha falhado. Foi exatamente o que aconteceu tres vezes em producao.
+         *
+         * A silenciosa, e pior: a senha era gravada e a sessao do navegador continuava sendo a
+         * de QUEM CADASTROU. A pessoa recem-ativada ficava dentro da conta alheia sem nada na
+         * tela indicando isso.
+         *
+         * Vale igual para a redefinicao: trocar a senha e razao para a credencial antiga
+         * morrer, nao para sobreviver.
+         */
+        Session::desautenticar();
 
         $this->json(['destino' => '/login?motivo=senha-definida']);
     }

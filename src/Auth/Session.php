@@ -307,6 +307,34 @@ final class Session
         return is_int($quando) ? $quando : null;
     }
 
+    /**
+     * Tira a AUTENTICACAO sem derrubar a sessao.
+     *
+     * Existe para as telas de definir e redefinir senha. Elas sao abertas por OUTRA pessoa que
+     * nao a da sessao -- tipicamente no computador de quem cadastrou, que continua logado --,
+     * e manter aquela sessao faria a recem-ativada navegar dentro da conta alheia.
+     *
+     * Nao usa `encerrar()` porque destruir a sessao leva junto o token CSRF que a propria
+     * pagina acabou de emitir: o formulario renderiza com um token e o POST chega com a sessao
+     * ja morta, virando 419. Aqui a sessao continua a mesma; o que some e a credencial.
+     *
+     * O cache do painel some junto: ele foi calculado sob o token que acabou de deixar de valer.
+     */
+    public static function desautenticar(): void
+    {
+        self::iniciar();
+
+        unset(
+            $_SESSION['access_token'],
+            $_SESSION['expires_at'],
+            $_SESSION['claims'],
+            $_SESSION['dashboard_cache'],
+        );
+
+        self::descartarDesafio();
+        self::descartarEscolha();
+    }
+
     public static function encerrar(): void
     {
         self::iniciar();
