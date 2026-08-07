@@ -92,4 +92,23 @@ final class Guard
             Respond::redirecionar('/');
         }
     }
+
+    /**
+     * Tela do segundo fator: anonima no login, mas TAMBEM alcancavel por quem ja esta dentro.
+     *
+     * Trocar de organizacao para uma onde a pessoa e Admin devolve um desafio, e nesse momento
+     * ela continua autenticada na organizacao de origem. Com `exigeAnonimo` ali, o
+     * redirecionamento para /2fa cairia de volta no painel e a troca ficaria impossivel de
+     * concluir -- travando justamente o caso que o seletor existe para resolver.
+     *
+     * O que continua barrado e o que importa: autenticado SEM desafio pendente nao tem o que
+     * fazer nesta tela. E o desafio, sozinho, nao abre nada -- quem emite o token e a API,
+     * depois de conferir o codigo.
+     */
+    public static function exigeDesafioEmAberto(): void
+    {
+        if (Session::autenticado() && Session::desafio() === null) {
+            Respond::redirecionar('/');
+        }
+    }
 }

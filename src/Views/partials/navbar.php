@@ -35,10 +35,26 @@ use App\View;
     $tenantNome = Session::organizacao();
     ?>
     <?php if ($tenantUuid !== null) : ?>
-        <span class="badge-suave neutro d-none d-md-inline" title="Organizacao <?= View::e($tenantUuid) ?>">
-            <i class="fa-solid fa-building me-1"></i>
-            <?= View::e($tenantNome !== null && $tenantNome !== '' ? $tenantNome : 'org ' . substr($tenantUuid, 0, 8)) ?>
-        </span>
+        <?php $rotulo = $tenantNome !== null && $tenantNome !== '' ? $tenantNome : 'org ' . substr($tenantUuid, 0, 8); ?>
+        <div class="dropdown d-none d-md-block" id="seletor-org">
+            <button class="badge-suave neutro border-0 dropdown-toggle" type="button"
+                    data-bs-toggle="dropdown" aria-expanded="false"
+                    title="Organizacao <?= View::e($tenantUuid) ?>">
+                <i class="fa-solid fa-building me-1"></i><?= View::e($rotulo) ?>
+            </button>
+            <ul class="dropdown-menu shadow-sm" id="lista-orgs">
+                <?php
+                /*
+                 * A lista carrega ao ABRIR, nao no render da pagina.
+                 *
+                 * Buscá-la em toda navegacao custaria uma ida a API por pagina para uma
+                 * informacao que quase nunca muda e que a maioria das pessoas -- as de uma
+                 * organizacao so -- nunca vai usar.
+                 */
+                ?>
+                <li class="px-3 py-2 small" style="color: var(--text-secondary)">Carregando…</li>
+            </ul>
+        </div>
     <?php endif; ?>
 
     <div class="ms-auto d-flex align-items-center gap-2">

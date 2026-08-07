@@ -181,6 +181,10 @@ $router->put('/api/permissoes/{uuid}', [PermissionsController::class, 'atualizar
 $router->get('/logs', [LoggersController::class, 'index']);
 $router->get('/api/logs', [LoggersController::class, 'listar']);
 
+// Seletor de organizacao da barra. Autenticadas: a pergunta e sobre a propria sessao.
+$router->get('/api/organizacoes', [AuthController::class, 'organizacoes']);
+$router->post('/api/organizacoes/trocar', [AuthController::class, 'trocarOrganizacao']);
+
 // Troca de senha do proprio usuario. Autenticada, e por isso fica fora do bloco anonimo.
 $router->post('/api/trocar-senha', [AuthController::class, 'trocarSenha']);
 

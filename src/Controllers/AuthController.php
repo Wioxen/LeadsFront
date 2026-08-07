@@ -197,7 +197,7 @@ final class AuthController extends Controller
      */
     public function formularioCodigo(): never
     {
-        Guard::exigeAnonimo();
+        Guard::exigeDesafioEmAberto();
 
         $desafio = Session::desafio();
 
@@ -224,7 +224,7 @@ final class AuthController extends Controller
      */
     public function confirmarCodigo(): never
     {
-        Guard::exigeAnonimo();
+        Guard::exigeDesafioEmAberto();
 
         $desafio = Session::desafio();
 
@@ -268,11 +268,62 @@ final class AuthController extends Controller
      * um pedido forjado consegue e apagar um desafio pendente de quem ainda nao entrou --
      * que se resolve refazendo o login. Nao ha sessao, dado nem privilegio em jogo.
      */
+    /**
+     * Organizacoes que a pessoa participa, para o seletor da barra.
+     *
+     * O token so carrega a organizacao ATUAL -- de quais outras ela participa e pergunta que
+     * so a API responde.
+     */
+    public function organizacoes(): never
+    {
+        Guard::exigeLogin(true);
+
+        $this->json($this->api->get('/api/auth/tenants')->corpo());
+    }
+
+    /**
+     * Troca a organizacao da sessao sem passar pelo login.
+     *
+     * Devolve `destino` em vez de redirecionar: quem chama e o menu por XHR, e um 302 ali
+     * seria seguido pelo fetch em silencio, trocando a pagina sem a tela saber.
+     *
+     * `202` significa que o vinculo de DESTINO exige codigo -- entrar como Admin pede o
+     * segundo fator mesmo vindo de uma organizacao que nao pedia. A sessao atual NAO e
+     * descartada aqui: se a pessoa desistir na tela do codigo, ela continua onde estava.
+     */
+    public function trocarOrganizacao(): never
+    {
+        Guard::exigeLogin(true);
+
+        $resposta = $this->api->post('/api/auth/switch-tenant', [
+            'tenantUuid' => $this->campo('tenantUuid'),
+        ]);
+
+        if ($resposta->status() === 202) {
+            Session::guardarDesafio($resposta->corpo(), Session::email() ?? '');
+
+            $this->json(['destino' => '/2fa']);
+        }
+
+        // Substitui o token: o novo carrega outro TenantId, e e ele que decide o que a
+        // sessao enxerga daqui para a frente.
+        Session::autenticar($resposta->corpo());
+
+        $this->json(['destino' => '/']);
+    }
+
     public function cancelarCodigo(): never
     {
+        /*
+         * Para onde voltar depende de haver sessao. Desistir de uma TROCA de organizacao nao
+         * pode derrubar a sessao de origem: quem cancelou continua onde estava, e mandá-lo ao
+         * login seria puni-lo por ter mudado de ideia.
+         */
+        $tinhaSessao = Session::autenticado();
+
         Session::descartarDesafio();
 
-        Respond::redirecionar('/login');
+        Respond::redirecionar($tinhaSessao ? '/' : '/login');
     }
 
     /**

@@ -134,6 +134,7 @@ use App\View;
 
 <script src="/assets/js/theme.js"></script>
 <script src="/assets/js/app.js"></script>
+<script src="/assets/js/seletor-organizacao.js"></script>
 
 <?php
 // Um arquivo por tela, carregado pelo data-page do <body>. Sem isso, o JS de todas as
