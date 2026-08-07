@@ -36,7 +36,7 @@ final class UsersController extends Controller
              * salva, le "salvo" e nada muda. E por isso que a condicao mora aqui e nao no
              * template, com o mesmo criterio dos dois lados.
              */
-            'podeConcederMaster' => Session::papel() === 'Admin' || Session::claim('master') === 'true',
+            'podeConcederMaster' => Session::podeConcederMaster(),
         ]);
     }
 
@@ -279,10 +279,10 @@ final class UsersController extends Controller
             'twoFactorEnabled' => (bool) ($corpo['twoFactorEnabled'] ?? false),
         ];
 
-        // Só envia 'master' quem pode concede-lo. Mandar o campo de um master seria
-        // inofensivo -- a API ignora --, mas o front deixaria de refletir a regra e o
-        // proximo leitor acharia que funciona.
-        if (Session::papel() === 'Admin') {
+        // So envia 'master' quem pode concede-lo -- mesma condicao que decide mostrar a
+        // caixa, agora num lugar so. Enquanto eram duas, esta ficou em "somente Admin" e a
+        // outra passou a aceitar master: a caixa aparecia e o campo era descartado aqui.
+        if (Session::podeConcederMaster()) {
             $dados['master'] = (bool) ($corpo['master'] ?? false);
         }
 

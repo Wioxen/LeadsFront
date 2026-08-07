@@ -384,6 +384,25 @@ final class Session
         return self::claim('TenantName');
     }
 
+    /**
+     * Se esta sessao pode CONCEDER a marca de master.
+     *
+     * Espelha `UserService.ResolveMaster` na API. Vive aqui, e nao repetido em cada ponto,
+     * porque a regra ja esteve escrita em DOIS lugares -- o que mostra a caixa no formulario e
+     * o que decide enviar o campo -- e um deles ficou para tras numa mudanca. O efeito foi o
+     * pior possivel: a caixa aparecia, a pessoa marcava, a tela dizia "salvo" e o valor era
+     * descartado antes de sair do front.
+     *
+     * Tem a mesma FORMA de `administra()` e mesmo assim e um metodo proprio: aquele espelha a
+     * politica AdminOrMaster, que decide quem ALCANCA as telas administrativas; este espelha
+     * quem pode conceder acesso livre. Hoje coincidem; sao perguntas diferentes, e unifica-las
+     * faria uma mudanca em qualquer das duas regras mexer silenciosamente na outra.
+     */
+    public static function podeConcederMaster(): bool
+    {
+        return self::papel() === 'Admin' || self::master();
+    }
+
     public static function email(): ?string
     {
         return self::primeiraClaim(self::CLAIMS_EMAIL);
