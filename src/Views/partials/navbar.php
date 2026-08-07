@@ -22,14 +22,22 @@ use App\View;
      * organizacao se esta e a origem do erro mais caro possivel -- cadastrar o lead certo
      * na empresa errada.
      *
-     * A API nao emite o nome do tenant no token, so o TenantUuid. Ate existir um
-     * /api/auth/me, o que da para mostrar sem inventar e o identificador curto.
+     * Passou a valer MAIS com o modelo N:N: antes, quem entrava so podia estar numa
+     * organizacao, e o rotulo era conferencia. Agora a mesma pessoa escolhe entre varias no
+     * login, e "por que nao vejo o registro que criei ontem?" costuma ser exatamente estar na
+     * outra -- uma pergunta que este rotulo responde antes de ser feita.
+     *
+     * O NOME vem da claim TenantName. Tokens emitidos antes de ela existir nao a tem, e ai
+     * cai no identificador curto, que era o que se mostrava ate agora: pior de ler, mas
+     * melhor que um cabecalho que some justo em quem ainda nao renovou a sessao.
      */
     $tenantUuid = Session::claim('TenantUuid');
+    $tenantNome = Session::organizacao();
     ?>
     <?php if ($tenantUuid !== null) : ?>
         <span class="badge-suave neutro d-none d-md-inline" title="Organizacao <?= View::e($tenantUuid) ?>">
-            <i class="fa-solid fa-building me-1"></i>org <?= View::e(substr($tenantUuid, 0, 8)) ?>
+            <i class="fa-solid fa-building me-1"></i>
+            <?= View::e($tenantNome !== null && $tenantNome !== '' ? $tenantNome : 'org ' . substr($tenantUuid, 0, 8)) ?>
         </span>
     <?php endif; ?>
 

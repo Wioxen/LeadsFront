@@ -330,6 +330,21 @@ final class Session
         return self::primeiraClaim(self::CLAIMS_PAPEL);
     }
 
+    /**
+     * Nome da organizacao da sessao.
+     *
+     * Passou a importar com o modelo N:N: a mesma pessoa pode ter sessao em organizacoes
+     * diferentes, e sem isto a tela nao diz em qual ela esta -- e "por que nao vejo os
+     * dados?" costuma ser exatamente estar na outra.
+     *
+     * EXIBICAO apenas. Nenhuma decisao depende deste valor, e ele congela na emissao do
+     * token: renomear a organizacao so aparece no proximo login.
+     */
+    public static function organizacao(): ?string
+    {
+        return self::claim('TenantName');
+    }
+
     public static function email(): ?string
     {
         return self::primeiraClaim(self::CLAIMS_EMAIL);
