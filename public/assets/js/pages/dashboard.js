@@ -184,6 +184,29 @@
 
         var p = App.problema(xhr);
 
+        /*
+         * 403 NAO e falha: e a resposta correta para quem ainda nao tem perfil.
+         *
+         * Usuario recem-criado nasce sem perfil nenhum, e o painel agrega a listagem de
+         * leads -- entao a PRIMEIRA tela dele era um erro com botao de "tentar de novo",
+         * que nunca ia funcionar. Tratado como estado, a tela diz o que falta e a quem
+         * pedir, sem oferecer uma acao inutil.
+         */
+        if (xhr.status === 403) {
+          $('#ultimos-leads').html(
+            '<div class="estado-vazio"><i class="fa-solid fa-lock"></i>' +
+            'Voce ainda nao tem acesso aos leads.' +
+            '<div class="small mt-1" style="color:var(--text-secondary)">' +
+            'Peca um perfil a quem administra a sua organizacao.</div></div>'
+          );
+
+          // Zera os indicadores: deixar "--" ou numeros de outra carga sugeriria que os
+          // dados existem e nao carregaram, quando o caso e nao haver acesso a eles.
+          renderKpis({ total: 0, novos: 0, comEmail: 0, semEmail: 0 });
+
+          return;
+        }
+
         $('#ultimos-leads').html(
           '<div class="estado-vazio"><i class="fa-solid fa-triangle-exclamation"></i>' +
           App.escapar(p.detail || p.title) +
