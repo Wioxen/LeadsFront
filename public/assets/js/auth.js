@@ -76,11 +76,11 @@
       })
         .done(function (r) {
           /*
-           * O POST devolve TokenResponse e o PHP ja gravou a sessao. Vai direto ao
-           * dashboard: mandar o usuario fazer login logo depois de definir a propria senha
-           * seria um passo sem funcao.
+           * A API responde 204 e NAO emite token: com varias organizacoes possiveis, este
+           * fluxo nao tem como saber em qual a pessoa quer entrar. Quem pergunta isso e o
+           * login, entao e para la que se vai.
            */
-          App.alerta('ok', 'Senha definida. Bem-vindo!');
+          App.alerta('ok', 'Senha definida. Entre com ela para continuar.');
           setTimeout(function () { window.location.href = r.destino || '/'; }, 600);
         })
         .fail(function (xhr) {

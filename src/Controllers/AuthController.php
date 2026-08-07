@@ -33,6 +33,7 @@ final class AuthController extends Controller
             'saiu'            => 'Voce saiu com seguranca.',
             'codigo-expirado' => 'O codigo expirou ou nao vale mais. Entre de novo para receber outro.',
             'escolha-expirada' => 'A escolha de organizacao expirou. Entre novamente.',
+            'senha-definida'  => 'Senha definida. Entre com ela para continuar.',
             default           => null,
         };
 
@@ -428,9 +429,19 @@ final class AuthController extends Controller
      * O POST devolve TokenResponse: grava a sessao e leva direto ao dashboard. Mandar o
      * usuario fazer login logo depois de definir a propria senha e um passo sem funcao.
      */
+    /**
+     * Define a senha e manda fazer o login.
+     *
+     * A API responde 204 e NAO emite token: uma pessoa pode participar de varias
+     * organizacoes, e este fluxo nao tem como saber em qual ela quer entrar. Quem responde
+     * isso e o login -- que pergunta, quando ha mais de uma.
+     *
+     * Custa um passo a quem acabou de definir a senha. Em troca, este fluxo deixa de ter
+     * opiniao sobre sessao: grava uma senha, e mais nada.
+     */
     private function concluirComToken(string $endpoint): never
     {
-        $resposta = $this->api->post($endpoint, [
+        $this->api->post($endpoint, [
             'token' => $this->campo('token'),
             'senha' => $this->campo('senha'),
 
@@ -440,8 +451,6 @@ final class AuthController extends Controller
             'confirmacaoSenha' => $this->campo('confirmacaoSenha'),
         ], exigeToken: false);
 
-        Session::autenticar($resposta->corpo());
-
-        $this->json(['destino' => '/']);
+        $this->json(['destino' => '/login?motivo=senha-definida']);
     }
 }

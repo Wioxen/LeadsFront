@@ -110,6 +110,21 @@ use App\View;
                         <div class="col-12">
                             <label class="form-label" for="u-email">Email</label>
                             <input type="email" class="form-control" id="u-email" name="email" maxlength="255" required>
+                            <?php
+                            /*
+                             * So editavel na CRIACAO. Na edicao o campo e desabilitado pelo
+                             * JavaScript, porque a API nao aceita mais email no PUT: ele
+                             * identifica a pessoa no sistema inteiro, e trocar por aqui
+                             * mudaria a credencial dela em TODAS as organizacoes de que
+                             * participa -- inclusive nas que quem edita nao administra.
+                             *
+                             * Campo aberto e ignorado em silencio seria pior que campo
+                             * fechado com o motivo a vista.
+                             */
+                            ?>
+                            <div class="form-text d-none" id="u-email-travado">
+                                O email identifica a pessoa no sistema e nao pode ser alterado.
+                            </div>
                         </div>
                         <div class="col-7">
                             <label class="form-label" for="u-phone">Telefone</label>

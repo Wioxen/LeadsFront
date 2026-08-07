@@ -291,6 +291,10 @@
 
     $('[name="uuid"]', $form).val(u ? u.uuid : '');
 
+    // O email so e editavel na criacao -- a API nao o aceita no PUT.
+    $('[name="email"]', $form).prop('disabled', !!u);
+    $('#u-email-travado').toggleClass('d-none', !u);
+
     if (u) {
       $('[name="firstName"]', $form).val(u.firstName);
       $('[name="lastName"]', $form).val(u.lastName);
@@ -354,11 +358,28 @@
     var nome = $(this).data('nome');
     var usuario = $(this).closest('tr').find('.btn-editar').data('usuario');
 
-    App.confirmarExclusao('o usuario ' + nome).then(function (ok) {
+    /*
+     * "Excluir" passou a significar REMOVER DESTA ORGANIZACAO.
+     *
+     * A pessoa continua existindo, com a mesma senha e a mesma foto, nas organizacoes de que
+     * ainda participa. Chamar isso de exclusao levaria quem clica a acreditar que apagou
+     * alguem do sistema.
+     */
+    Swal.fire({
+      title: 'Remover ' + nome + ' desta organizacao?',
+      text: 'A pessoa perde o acesso aqui. Se participar de outras organizacoes, continua '
+          + 'nelas com a mesma senha.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Remover',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: App.token('--brand-danger'),
+      reverseButtons: true
+    }).then(function (r) { return r.isConfirmed; }).then(function (ok) {
       if (!ok) { return; }
 
       App.del('/api/usuarios/' + uuid)
-        .done(function () { App.alerta('ok', 'Usuario excluido.'); carregar(); })
+        .done(function () { App.alerta('ok', 'Removido desta organizacao.'); carregar(); })
         .fail(function (xhr) {
           var p = App.problema(xhr);
 
@@ -452,11 +473,26 @@
           App.alerta('erro', 'Cadastro salvo, mas a foto nao subiu: ' + (p.detail || p.title));
         });
       })
-      .done(function () {
+      .done(function (r) {
         modalUsuario.hide();
+
+        /*
+         * Criar pode ter sido VINCULAR.
+         *
+         * Quando o email ja existe, a API nao cria pessoa nova: liga a existente a esta
+         * organizacao e avisa por email, sem link de senha -- ela ja tem uma. A tela precisa
+         * dizer isso, senao quem cadastrou fica esperando o convite chegar.
+         *
+         * O discriminador e verifiedAtUtc: pessoa recem-criada nasce sem ele.
+         */
+        var vinculou = !uuid && r && r.verifiedAtUtc;
+
         App.alerta('ok', uuid
           ? 'Usuario atualizado.'
-          : 'Usuario criado. Um email de verificacao foi enviado para ele definir a senha.');
+          : vinculou
+            ? 'Essa pessoa ja tinha conta e foi vinculada a esta organizacao. '
+              + 'Ela entra com a senha que ja usa.'
+            : 'Usuario criado. Um email de verificacao foi enviado para ele definir a senha.');
         carregar();
       })
       .fail(function (xhr) {
