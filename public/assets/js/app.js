@@ -311,7 +311,12 @@ window.App = (function ($) {
    * pagina autenticada, e um handler por tela seria o mesmo codigo repetido em cada uma.
    */
   $(function () {
-    var $form = $('#form-senha');
+    /*
+     * #form-trocar-senha, nao #form-senha: este arquivo tambem carrega no layout anonimo, e
+     * la existe um #form-senha que e a tela de DEFINIR senha. Com o id repetido, um submit
+     * acionava os dois tratadores.
+     */
+    var $form = $('#form-trocar-senha');
 
     if (!$form.length) { return; }
 

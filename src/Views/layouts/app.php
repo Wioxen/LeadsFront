@@ -68,7 +68,19 @@ use App\View;
 <div class="modal fade" id="modal-senha" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <form id="form-senha" novalidate>
+            <?php
+            /*
+             * id PROPRIO, e nao "form-senha".
+             *
+             * Este modal vive no layout, e o app.js que o serve e carregado tambem pelo layout
+             * anonimo -- onde a tela de definir senha usava o mesmo id. Um submit disparava os
+             * DOIS tratadores: a senha era gravada pelo primeiro e o segundo chamava
+             * /api/trocar-senha e falhava, produzindo um toast de sucesso e outro de erro na
+             * mesma acao. Ids iguais em formularios diferentes nao colidem enquanto as telas
+             * nao se encontram; estas se encontraram.
+             */
+            ?>
+            <form id="form-trocar-senha" novalidate>
                 <div class="modal-header">
                     <h2 class="modal-title h6 fw-semibold">Trocar senha</h2>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
