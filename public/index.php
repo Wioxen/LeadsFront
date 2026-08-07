@@ -102,6 +102,17 @@ header('Referrer-Policy: same-origin');
 
 $router = new Router();
 
+/*
+ * Identidade do que esta deployado, sem autenticacao.
+ *
+ * A API tem /health com o commit; o front nao tinha equivalente, e confirmar um deploy dependia
+ * de pedir para alguem testar a tela. Anonima pela mesma razao do /health: quem confere deploy
+ * costuma nao ter sessao.
+ *
+ * Nao revela caminho, configuracao nem conteudo -- so um digest dos arquivos servidos.
+ */
+$router->get('/version', [\App\Controllers\VersionController::class, 'mostrar']);
+
 // --- Paginas anonimas -------------------------------------------------------------------
 $router->get('/login', [AuthController::class, 'formularioLogin']);
 $router->post('/login', [AuthController::class, 'login']);
