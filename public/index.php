@@ -109,9 +109,9 @@ $router->get('/logout', [AuthController::class, 'logout']);
 
 // Segundo passo do login. Anonimas de proposito: quem chega aqui provou a senha e ainda nao
 // tem token -- a sessao guarda apenas o desafio, nao credencial nenhuma.
-$router->get('/codigo', [AuthController::class, 'formularioCodigo']);
-$router->post('/codigo', [AuthController::class, 'confirmarCodigo']);
-$router->get('/codigo/cancelar', [AuthController::class, 'cancelarCodigo']);
+$router->get('/2fa', [AuthController::class, 'formularioCodigo']);
+$router->post('/2fa', [AuthController::class, 'confirmarCodigo']);
+$router->get('/2fa/cancelar', [AuthController::class, 'cancelarCodigo']);
 
 // Escolha de organizacao, quando a mesma senha vale em mais de uma. Anonimas: quem chega
 // aqui provou a senha e ainda nao tem token -- a sessao guarda so a escolha pendente.

@@ -36,7 +36,7 @@ $restam = max(0, ($desafio['expira_em'] ?? 0) - time());
         <div class="alert alert-danger py-2 small mb-3"><?= View::e($erro) ?></div>
     <?php endif; ?>
 
-    <form method="post" action="/codigo" novalidate id="form-codigo">
+    <form method="post" action="/2fa" novalidate id="form-codigo">
         <?= Csrf::campo() ?>
 
         <div class="mb-3">
@@ -79,6 +79,6 @@ $restam = max(0, ($desafio['expira_em'] ?? 0) - time());
          * este. Um botao chamado "reenviar" prometeria algo que nao existe.
          */
         ?>
-        <a href="/codigo/cancelar" class="small text-decoration-none">Entrar com outra conta</a>
+        <a href="/2fa/cancelar" class="small text-decoration-none">Entrar com outra conta</a>
     </div>
 </div>

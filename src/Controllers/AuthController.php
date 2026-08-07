@@ -110,7 +110,7 @@ final class AuthController extends Controller
         if ($resposta->status() === 202) {
             Session::guardarDesafio($resposta->corpo(), $email);
 
-            Respond::redirecionar('/codigo');
+            Respond::redirecionar('/2fa');
         }
 
         Session::autenticar($resposta->corpo());
